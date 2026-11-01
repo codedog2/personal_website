@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Optical Archive · Spike</title>
+<!-- THROWAWAY SPIKE: only for judging look & feel. Not the real site. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+  <canvas id="gl"></canvas>
+
+  <header class="brand">
+    <div class="kicker">— PERSONAL PORTFOLIO —</div>
+    <h1>Optical Archive</h1>
+    <div class="who">Terry (Yaowei) Feng</div>
+    <div class="role">Software Engineer</div>
+  </header>
+
+  <div class="topright">
+    <span class="spike-tag">SPIKE · 试验版</span>
+    <button id="sound" class="chip">♪ SOUND OFF</button>
+  </div>
+
+  <div class="counter" id="counter">01 / 04</div>
+  <div class="hint" id="hint">DRAG · SCROLL · ← → to browse &nbsp;·&nbsp; ENTER / click / turn the knob to load</div>
+
+  <!-- HTML content that sits exactly on the 3D reading screen -->
+  <div id="reader" class="reader" aria-hidden="true">
+    <div class="reader-inner" id="readerInner"></div>
+  </div>
+  <button id="exit" class="exit">◀ BACK <kbd>ESC</kbd></button>
+
+  <div id="loading" class="loading">warming up the lamp…</div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
