@@ -6,7 +6,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { CONFIG } from '../config.js';
 import { SECTIONS } from '../core/content.js';
 import { t } from '../core/i18n.js';
-import { canvasTex, grungeTex, woodTex, windowTex, drawDial } from './textures.js';
+import { canvasTex, grungeTex, woodTex, windowTex, drawDial, ensureFonts } from './textures.js';
 import { filmPose } from './film.js';
 
 const V = (a) => new THREE.Vector3(...a);
@@ -103,13 +103,18 @@ export function buildMachine(stage, models, lang) {
   }), [0, 0, 0.18], rig);
   glass.castShadow = glass.receiveShadow = false;
 
-  function drawIdle(index, l) {
-    const c = screenTex.userData.canvas, g = c.getContext('2d'), w = c.width, h = c.height, id = SECTIONS[index].id;
+  let idleGen = 0;
+  async function drawIdle(index, l) {
+    const mine = ++idleGen, id = SECTIONS[index].id;
+    const serifName = l === 'zh' ? '"Noto Serif SC"' : l === 'ja' ? '"Noto Serif JP"' : '"Cormorant Garamond"';
+    await ensureFonts([`600 120px ${serifName}`, `500 46px ${serifName}`], t(`section.${id}.title`, l) + t(`section.${id}.tagline`, l) + t('ui.screen.load', l));
+    if (mine !== idleGen) return;
+    const c = screenTex.userData.canvas, g = c.getContext('2d'), w = c.width, h = c.height;
     const gr = g.createRadialGradient(w / 2, h * 0.42, 40, w / 2, h / 2, w * 0.62);
     gr.addColorStop(0, '#f0e2c0'); gr.addColorStop(0.7, '#cdb58a'); gr.addColorStop(1, '#8a7350');
     g.fillStyle = gr; g.fillRect(0, 0, w, h);
     g.fillStyle = 'rgba(60,40,20,.07)'; for (let y = 0; y < h; y += 4) g.fillRect(0, y, w, 1);
-    const serif = l === 'zh' ? '"Noto Serif SC"' : l === 'ja' ? '"Noto Serif JP"' : '"Cormorant Garamond"';
+    const serif = serifName;
     g.textAlign = 'left'; g.fillStyle = '#5a3a1a'; g.font = '500 26px "IBM Plex Mono"';
     g.fillText('OPTICAL ARCHIVE · READER OR-3', 70, 90);
     g.fillText(`FRAME ${String(index + 1).padStart(2, '0')} / ${String(SECTIONS.length).padStart(2, '0')}`, 70, 128);

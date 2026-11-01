@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { CONFIG } from '../config.js';
 import { SECTIONS } from '../core/content.js';
 import { t } from '../core/i18n.js';
-import { drawFrame } from './textures.js';
+import { drawFrame, ensureFonts } from './textures.js';
 
 const { FILM_CENTER: [CX, CY, CZ], BEND, TILT, LEAD, REEL } = CONFIG;
 const P = CONFIG.FILM.PITCH;
@@ -41,11 +41,15 @@ export function buildFilm(stage, lang) {
     meshes.push(mesh);
   }
 
-  function relabel(l) {
+  let generation = 0;
+  async function relabel(l) {
+    const mine = ++generation, font = LABEL_FONT[l] || LABEL_FONT.en;
+    await ensureFonts([font], SECTIONS.map(sec => t(`section.${sec.id}.title`, l)).join(''));
+    if (mine !== generation) return;                    // a newer language switch won
     for (const m of meshes) {
       const { ci, leader, canvas, tex } = m.userData;
       if (ci === null) drawFrame(canvas, 'leader', leader);
-      else drawFrame(canvas, SECTIONS[ci].id, t(`section.${SECTIONS[ci].id}.title`, l), LABEL_FONT[l] || LABEL_FONT.en);
+      else drawFrame(canvas, SECTIONS[ci].id, t(`section.${SECTIONS[ci].id}.title`, l), font);
       tex.needsUpdate = true;
     }
   }

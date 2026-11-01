@@ -3,6 +3,12 @@ import * as THREE from 'three';
 
 const rnd = (a, b) => a + Math.random() * (b - a);
 
+/** Web fonts load per unicode subset; make sure the glyphs we are about to paint are present (max 1.5 s wait). */
+export function ensureFonts(fonts, text) {
+  if (!globalThis.document?.fonts) return Promise.resolve();
+  return Promise.race([Promise.all(fonts.map(f => document.fonts.load(f, text))).catch(() => {}), new Promise(r => setTimeout(r, 1500))]);
+}
+
 export function canvasTex(w, h, draw, { srgb = true, repeat } = {}) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   draw(c.getContext('2d'), w, h);
