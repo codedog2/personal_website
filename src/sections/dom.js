@@ -22,9 +22,9 @@ export function sectionHead(id, lang) {
   const i = SECTIONS.findIndex(s => s.id === id);
   const n = String(i + 1).padStart(2, '0'), total = String(SECTIONS.length).padStart(2, '0');
   return [
-    el('div', { class: 'kick' }, `${n} / ${total} · ${t(`nav.${id}`, 'en').toUpperCase()}`),
-    el('h2', {}, t(`section.${id}.title`, lang)),
-    el('div', { class: 'sub' }, t(`section.${id}.tagline`, lang)),
+    el('div', { class: 'kick shead' }, `${n} / ${total} · ${t(`nav.${id}`, 'en').toUpperCase()}`),
+    el('h2', { class: 'shead' }, t(`section.${id}.title`, lang)),
+    el('div', { class: 'sub shead' }, t(`section.${id}.tagline`, lang)),
   ];
 }
 
