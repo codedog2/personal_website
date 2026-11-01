@@ -26,19 +26,19 @@ test('clicking nav, arrow keys and swipe change section and dots', () => {
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
   expect(root.querySelector('nav .on').dataset.section).toBe('certificates');
   const panel = root.querySelector('.panel');
-  panel.dispatchEvent(new PointerEvent('pointerdown', { clientX: 300, clientY: 100, bubbles: true }));
-  panel.dispatchEvent(new PointerEvent('pointerup', { clientX: 200, clientY: 105, bubbles: true }));
+  panel.dispatchEvent(new PointerEvent('pointerdown', { clientX: 300, clientY: 100, bubbles: true, pointerType: 'touch' }));
+  panel.dispatchEvent(new PointerEvent('pointerup', { clientX: 200, clientY: 105, bubbles: true, pointerType: 'touch' }));
   expect(root.querySelector('nav .on').dataset.section).toBe('certificates');
-  panel.dispatchEvent(new PointerEvent('pointerdown', { clientX: 200, clientY: 100, bubbles: true }));
-  panel.dispatchEvent(new PointerEvent('pointerup', { clientX: 300, clientY: 110, bubbles: true }));
+  panel.dispatchEvent(new PointerEvent('pointerdown', { clientX: 200, clientY: 100, bubbles: true, pointerType: 'touch' }));
+  panel.dispatchEvent(new PointerEvent('pointerup', { clientX: 300, clientY: 110, bubbles: true, pointerType: 'touch' }));
   expect(root.querySelector('nav .on').dataset.section).toBe('skills');
 });
 
 test('mostly vertical drag is not a swipe', () => {
   const { root } = setup();
   const panel = root.querySelector('.panel');
-  panel.dispatchEvent(new PointerEvent('pointerdown', { clientX: 300, clientY: 100, bubbles: true }));
-  panel.dispatchEvent(new PointerEvent('pointerup', { clientX: 240, clientY: 300, bubbles: true }));
+  panel.dispatchEvent(new PointerEvent('pointerdown', { clientX: 300, clientY: 100, bubbles: true, pointerType: 'touch' }));
+  panel.dispatchEvent(new PointerEvent('pointerup', { clientX: 240, clientY: 300, bubbles: true, pointerType: 'touch' }));
   expect(root.querySelector('nav .on').dataset.section).toBe('about');
 });
 
@@ -60,4 +60,12 @@ test('destroy removes keyboard handling', () => {
   api.destroy();
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
   expect(root.childElementCount).toBe(0);
+});
+
+test('mouse drag (e.g. selecting text) is not a swipe', () => {
+  const { root } = setup();
+  const panel = root.querySelector('.panel');
+  panel.dispatchEvent(new PointerEvent('pointerdown', { clientX: 300, clientY: 100, bubbles: true, pointerType: 'mouse' }));
+  panel.dispatchEvent(new PointerEvent('pointerup', { clientX: 150, clientY: 102, bubbles: true, pointerType: 'mouse' }));
+  expect(root.querySelector('nav .on').dataset.section).toBe('about');
 });

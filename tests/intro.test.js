@@ -52,3 +52,15 @@ test('marks intro as seen and removes itself', async () => {
   expect(readPref('introSeen', false)).toBe(true);
   expect(root.querySelector('.intro')).toBeNull();
 });
+
+test('skip before loading finishes holds on the loading frame instead of revealing a blank page', async () => {
+  const root = mk(); let release; const ready = new Promise(r => { release = r; }); let done = false;
+  runIntro(root, opts({ ready })).then(() => { done = true; });
+  root.querySelector('[data-skip]').click();
+  await vi.advanceTimersByTimeAsync(1000);
+  expect(done).toBe(false);
+  expect(root.querySelector('.intro-loading').hidden).toBe(false);
+  expect(root.querySelector('.intro-q').textContent).toBe(t('intro.question', 'en'));
+  release(); await vi.runAllTimersAsync();
+  expect(done).toBe(true);
+});

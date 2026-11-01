@@ -55,6 +55,12 @@ export function runIntro(root, { ready, seen, lang, reducedMotion }) {
     };
     Promise.resolve(ready).then(() => {}, () => {}).then(() => { loaded = true; maybeFinish(); });
     later(plan.end, () => { timeUp = true; maybeFinish(); });
-    skip.addEventListener('click', finish);
+    skip.addEventListener('click', () => {
+      if (loaded) { finish(); return; }
+      // not loaded yet: jump to the last frame and wait there rather than reveal an empty page
+      timers.forEach(clearTimeout);
+      overlay.classList.add('lit'); q.classList.remove('typing'); q.textContent = question; answer.classList.add('show');
+      skip.hidden = true; timeUp = true; maybeFinish();
+    });
   });
 }

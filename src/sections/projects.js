@@ -51,7 +51,7 @@ export function renderProjects(host, { data, lang }) {
           el('div', { class: 'grp-name' }, t('ui.overview', lang)),
           el('p', {}, pick(p.overview, lang)),
           el('div', { class: 'grp-name' }, t('ui.techStack', lang)),
-          el('div', { class: 'tokens' }, p.stack.map(id => stackToken(host, data, id, lang))),
+          el('div', { class: 'tokens' }, (p.stack || []).map(id => stackToken(host, data, id, lang))),
           links.length ? el('div', { class: 'grp-name' }, t('ui.links', lang)) : null,
           links.length ? el('div', { class: 'links' }, links.map(([k, url]) =>
             el('a', { href: url, target: '_blank', rel: 'noopener', 'data-link': k }, t(`ui.${k}`, lang)))) : null)),

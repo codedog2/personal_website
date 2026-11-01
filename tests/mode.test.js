@@ -1,4 +1,4 @@
-import { chooseView, mountView } from '../src/core/mode.js';
+import { chooseView, mountView, switchView, savedView } from '../src/core/mode.js';
 
 const base = { webgl: true, width: 1440, height: 900, coarse: false, saved: null };
 
@@ -33,4 +33,23 @@ test('mountView 2d mounts only 2d', async () => {
   const mount3d = vi.fn(), mount2d = vi.fn();
   expect(await mountView('2d', { mount3d, mount2d })).toBe('2d');
   expect(mount3d).not.toHaveBeenCalled();
+});
+
+test('switchView works even when storage is blocked: the choice rides in the URL', () => {
+  vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked'); });
+  vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('blocked'); });
+  const loc = { href: 'https://u.github.io/?lang=x#about', assign: vi.fn() };
+  switchView('2d', loc);
+  const url = new URL(loc.assign.mock.calls[0][0]);
+  expect(url.searchParams.get('view')).toBe('2d');
+  expect(savedView(url.search)).toBe('2d');
+  vi.restoreAllMocks();
+});
+test('savedView prefers the URL, then storage, ignores junk', () => {
+  localStorage.setItem('oa:view', '"3d"');
+  expect(savedView('?view=2d')).toBe('2d');
+  expect(savedView('')).toBe('3d');
+  expect(savedView('?view=vr')).toBe('3d');
+  localStorage.clear();
+  expect(savedView('')).toBe(null);
 });

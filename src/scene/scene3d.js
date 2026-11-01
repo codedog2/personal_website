@@ -12,7 +12,7 @@ import { buildMachine } from './machine.js';
 import { buildFilm } from './film.js';
 import { createFilm, dragStart, dragMove, dragEnd, wheel, nudge, goTo, stepFilm, filmIndex, isSettled } from './filmPhysics.js';
 import { zoomDistance, loadTimeline, unloadTimeline } from './zoom.js';
-import { READER, nextReader, canBrowse } from './readerMachine.js';
+import { READER, nextReader, canBrowse, routeKey } from './readerMachine.js';
 
 const CANVAS_FONTS = ['600 64px "Cormorant Garamond"', 'italic 500 64px "Cormorant Garamond"', '500 32px "IBM Plex Mono"', '600 64px "Noto Serif SC"', '600 64px "Noto Serif JP"'];
 const POWER_ON_AT = 1.2;   // seconds into the load timeline when the screen flickers on
@@ -54,7 +54,7 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
   const soundBtn = el('button', { type: 'button', class: 'chip', onclick: () => { sound.setEnabled(!sound.enabled); soundBtn.blur(); paintChrome(); } });
   const simpleBtn = el('button', { type: 'button', class: 'chip', onclick: () => switchView('2d') });
   const readerBody = el('div', { class: 'section' });
-  const reader = el('div', { class: 'reader', role: 'dialog', 'aria-modal': 'true' }, el('div', { class: 'paper' }, readerBody));
+  const reader = el('div', { class: 'reader', role: 'dialog', 'aria-modal': 'true', tabindex: -1 }, el('div', { class: 'paper' }, readerBody));
   const exitKey = el('kbd', {}, 'ESC');
   const exitLabel = el('span');
   const exit = el('button', { type: 'button', class: 'exit', onclick: () => unload() }, exitLabel, exitKey);
@@ -93,13 +93,14 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     reader.classList.add('show');
     shell.classList.add('zoomed');
     placeReader();
-    exit.focus({ preventScroll: true });
+    reader.focus({ preventScroll: true });            // keyboard scrolling works; Tab still reaches BACK
   }
   function unload() {
     if (state !== READER.ZOOMED) return;
     state = nextReader(state, 'BACK'); phase = 0;
     reader.classList.remove('show');
     shell.classList.remove('zoomed');
+    if (shell.contains(document.activeElement)) document.activeElement.blur();
     sound.clunk();
   }
 
@@ -135,6 +136,11 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     drag.moved = Math.max(drag.moved, Math.hypot(e.clientX - drag.x, e.clientY - drag.y));
     drag.lastX = e.clientX; drag.lastT = now;
   }
+  function onCancel() {                                  // the browser took the gesture (e.g. a touch scroll)
+    if (!drag) return;
+    drag = null; canvas.classList.remove('dragging');
+    dragEnd(physics);
+  }
   function onUp(e) {
     if (!drag) return;
     const wasClick = drag.moved < 6, stale = performance.now() - drag.lastT > 80;
@@ -155,17 +161,18 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     if (canBrowse(state) && !drag) wheel(physics, e.deltaY + e.deltaX);
   }
   function onKey(e) {
-    if (state === READER.IDLE) {
-      if (e.key === 'ArrowRight') nudge(physics, 1);
-      else if (e.key === 'ArrowLeft') nudge(physics, -1);
-      else if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement)) load();
-    } else if (state === READER.ZOOMED && (e.key === 'Escape' || (e.key === 'Backspace' && !e.target.closest?.('input, textarea')))) {
-      e.preventDefault(); unload();
-    }
+    if (document.querySelector('.intro')) return;        // the scene is still behind the opening sequence
+    const action = routeKey(state, e.key);
+    if (action === 'next') nudge(physics, 1);
+    else if (action === 'prev') nudge(physics, -1);
+    else if (action === 'load' && !(e.target instanceof HTMLButtonElement)) load();
+    else if (action === 'back') { e.preventDefault(); unload(); }
+    else if (action === 'swallow' && (e.repeat || e.target !== exit)) e.preventDefault();   // a deliberate Enter on BACK still works
   }
   canvas.addEventListener('pointerdown', onDown);
   addEventListener('pointermove', onMove);
   addEventListener('pointerup', onUp);
+  addEventListener('pointercancel', onCancel);
   canvas.addEventListener('wheel', onWheel, { passive: false });
   addEventListener('keydown', onKey);
   const onResize = () => { stage.resize(); if (state === READER.ZOOMED) placeReader(); };
@@ -237,9 +244,9 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     stage.render(time);
   }
   function loop(now) {
+    raf = requestAnimationFrame(loop);                   // keep animating even if one frame throws
     const dt = Math.min((now - last) / 1000, 1 / 30); last = now;
-    frame(now, dt);
-    raf = requestAnimationFrame(loop);
+    try { frame(now, dt); } catch (err) { console.error('[scene3d] frame failed', err); }
   }
 
   paintChrome();
@@ -252,7 +259,7 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     destroy() {
       cancelAnimationFrame(raf); offLang();
       canvas.removeEventListener('pointerdown', onDown); canvas.removeEventListener('wheel', onWheel);
-      removeEventListener('pointermove', onMove); removeEventListener('pointerup', onUp);
+      removeEventListener('pointermove', onMove); removeEventListener('pointerup', onUp); removeEventListener('pointercancel', onCancel);
       removeEventListener('keydown', onKey); removeEventListener('resize', onResize);
       stage.dispose(); canvas.classList.remove('active'); root.replaceChildren();
     },

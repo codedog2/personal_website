@@ -2,7 +2,7 @@
 import './styles/paper.css';
 import { initLang } from './core/i18n.js';
 import { readPref } from './core/prefs.js';
-import { chooseView, hasWebGL, mountView, switchView } from './core/mode.js';
+import { chooseView, hasWebGL, mountView, switchView, savedView } from './core/mode.js';
 import { createSound } from './core/sound.js';
 import { runIntro } from './intro/intro.js';
 
@@ -15,7 +15,7 @@ const view = chooseView({
   width: innerWidth,
   height: innerHeight,
   coarse: matchMedia('(pointer: coarse)').matches,
-  saved: readPref('view', null),
+  saved: savedView(),
 });
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;

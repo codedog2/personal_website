@@ -60,7 +60,8 @@ export function mountFlat(root, { sound, switchView }) {
   }
 
   let down = null;
-  panel.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY }; });
+  // touch/pen only: a mouse drag here is usually text selection
+  panel.addEventListener('pointerdown', e => { down = e.pointerType === 'mouse' ? null : { x: e.clientX, y: e.clientY }; });
   panel.addEventListener('pointerup', e => {
     if (!down) return;
     const dx = e.clientX - down.x, dy = e.clientY - down.y; down = null;

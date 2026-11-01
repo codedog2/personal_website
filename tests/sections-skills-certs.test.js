@@ -52,3 +52,11 @@ test('renderSection dispatches all four ids', () => {
     expect(h.lang).toBe('zh');
   }
 });
+
+test('renderers survive missing optional arrays instead of throwing', () => {
+  const data = structuredClone(getContent());
+  delete data.profile.bio; delete data.profile.education; delete data.profile.contacts; delete data.projects[0].stack; delete data.projects[0].links;
+  for (const { id } of SECTIONS) expect(() => renderSection(host(), id, { data, lang: 'en' })).not.toThrow();
+  const h = host(); renderSection(h, 'projects', { data, lang: 'en' });
+  expect(() => h.querySelector('.pf').click()).not.toThrow();
+});

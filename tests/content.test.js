@@ -43,3 +43,12 @@ test('asset prefixes base url', () => {
   expect(asset('images/p01.svg')).toMatch(/^\/.*images\/p01\.svg$/);
   expect(asset('/images/p01.svg')).not.toMatch(/\/\/images/);
 });
+
+test('validator reports missing arrays that the renderers rely on', () => {
+  const bad = structuredClone(getContent());
+  delete bad.profile.bio; delete bad.profile.contacts; delete bad.projects[0].stack;
+  const problems = validateContent(bad);
+  expect(problems.some(p => p.includes('profile.bio'))).toBe(true);
+  expect(problems.some(p => p.includes('profile.contacts'))).toBe(true);
+  expect(problems.some(p => p.includes('projects[0].stack'))).toBe(true);
+});

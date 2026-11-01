@@ -1,7 +1,7 @@
 /* UI around the 3D reader: brand, frame counter, hint, top-right controls, the reading layer and BACK token. */
-.oa3d #gl { cursor: grab; touch-action: none; }
-.oa3d #gl.dragging { cursor: grabbing; }
-.oa3d #gl.hover { cursor: pointer; }
+#gl.active { cursor: grab; touch-action: none; }      /* the canvas sits outside the .oa3d shell */
+#gl.active.dragging { cursor: grabbing; }
+#gl.active.hover { cursor: pointer; }
 
 .oa3d .brand { position: fixed; left: 40px; top: 30px; pointer-events: none; transition: opacity .6s; }
 .oa3d .brand .kicker { font-family: var(--mono); font-size: 11px; letter-spacing: 3px; color: var(--dim); }
@@ -21,10 +21,11 @@
 .oa3d.zoomed .brand, .oa3d.zoomed .counter, .oa3d.zoomed .hint { opacity: 0; }
 
 /* HTML content glued onto the 3D glass */
+.oa3d .reader:focus { outline: none; }
 .oa3d .reader { position: fixed; display: none; border-radius: 6px; overflow: hidden; box-shadow: inset 0 0 60px rgba(90,55,20,.45); }
 .oa3d .reader.show { display: block; animation: poweron .55s steps(1) both; }
 .oa3d .reader.flash { animation: poweron .45s steps(1) both; }
-.oa3d .reader > .paper { position: absolute; inset: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #a08560 transparent; }
+.oa3d .reader > .paper { --u: max(1cqw, 9px); position: absolute; inset: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #a08560 transparent; }
 @keyframes poweron { 0% { opacity: 0 } 12% { opacity: .9 } 20% { opacity: .15 } 34% { opacity: 1 } 44% { opacity: .55 } 56%, 100% { opacity: 1 } }
 
 /* return token: same family as the skill boxes, but dark-filled with a keycap */

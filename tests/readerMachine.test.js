@@ -1,4 +1,4 @@
-import { READER, nextReader, canBrowse } from '../src/scene/readerMachine.js';
+import { READER, nextReader, canBrowse, routeKey } from '../src/scene/readerMachine.js';
 
 test('reader machine happy path', () => {
   let s = READER.IDLE;
@@ -18,4 +18,18 @@ test('reader machine ignores events outside their state', () => {
   expect(canBrowse('zoomed')).toBe(false);
   expect(canBrowse('loading')).toBe(false);
   expect(canBrowse('idle')).toBe(true);
+});
+
+test('routeKey: browsing keys only while idle', () => {
+  expect(routeKey('idle', 'ArrowRight')).toBe('next');
+  expect(routeKey('idle', 'ArrowLeft')).toBe('prev');
+  expect(routeKey('idle', 'Enter')).toBe('load');
+  expect(routeKey('loading', 'ArrowRight')).toBe(null);
+  expect(routeKey('zoomed', 'ArrowLeft')).toBe(null);
+});
+test('routeKey: Enter while reading is swallowed so a focused control cannot bounce the reader shut', () => {
+  expect(routeKey('zoomed', 'Enter')).toBe('swallow');
+  expect(routeKey('loading', 'Enter')).toBe('swallow');
+  expect(routeKey('zoomed', 'Escape')).toBe('back');
+  expect(routeKey('unloading', 'Escape')).toBe(null);
 });

@@ -27,6 +27,8 @@ export function validateContent(content) {
   const need = (text, where) => { if (!hasEn(text)) problems.push(`${where}: missing English text`); };
 
   const p = content.profile || {};
+  const list = (v, where) => { if (!Array.isArray(v)) problems.push(`${where}: must be a list`); };
+  list(p.bio, 'profile.bio'); list(p.contacts, 'profile.contacts'); list(p.education, 'profile.education');
   need(p.name, 'profile.name');
   need(p.role, 'profile.role');
   (p.bio || []).forEach((b, i) => need(b, `profile.bio[${i}]`));
@@ -45,6 +47,7 @@ export function validateContent(content) {
     need(pr.name, `projects[${i}].name`);
     need(pr.summary, `projects[${i}].summary`);
     need(pr.overview, `projects[${i}].overview`);
+    list(pr.stack, `projects[${i}].stack`);
     for (const id of pr.stack || []) if (!findSkill(content, id)) problems.push(`projects[${i}].stack: unknown skill id "${id}"`);
   });
 

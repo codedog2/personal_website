@@ -1,5 +1,5 @@
 // Picks the 3D reader or the 2D simple view, and falls back to 2D if 3D fails at runtime.
-import { writePref } from './prefs.js';
+import { readPref, writePref } from './prefs.js';
 
 export function hasWebGL() {
   try {
@@ -31,7 +31,19 @@ export async function mountView(view, { mount3d, mount2d }) {
   return '2d';
 }
 
-export function switchView(view) {
+const VIEWS = ['3d', '2d'];
+
+/** The visitor's explicit choice: ?view= in the URL first (works with storage blocked), then storage. */
+export function savedView(search = globalThis.location?.search ?? '') {
+  const fromUrl = new URLSearchParams(search).get('view');
+  if (VIEWS.includes(fromUrl)) return fromUrl;
+  const stored = readPref('view', null);
+  return VIEWS.includes(stored) ? stored : null;
+}
+
+export function switchView(view, loc = globalThis.location) {
   writePref('view', view);
-  location.reload();
+  const url = new URL(loc.href);
+  url.searchParams.set('view', view);
+  loc.assign(url.toString());
 }

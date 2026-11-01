@@ -15,7 +15,7 @@ function copyButton(value, lang) {
 
 export function renderAbout(host, { data, lang }) {
   const p = data.profile;
-  const contacts = el('div', { class: 'contact' }, p.contacts.map(c => [
+  const contacts = el('div', { class: 'contact' }, (p.contacts || []).map(c => [
     el('span', { class: 'k' }, c.label),
     el('span', { class: 'v' },
       el('a', { href: c.href, target: c.kind === 'email' ? null : '_blank', rel: c.kind === 'email' ? null : 'noopener' }, c.value),
@@ -26,7 +26,7 @@ export function renderAbout(host, { data, lang }) {
     el('span', { class: 'clip' }),
     p.photo ? el('img', { class: 'ph', src: asset(p.photo), alt: p.name }) : null,
     el('div', { class: 'k' }, t('ui.education', lang)),
-    el('div', { class: 'v' }, p.education.map((e, i) => [i ? el('br') : null, pick(e, lang)])),
+    el('div', { class: 'v' }, (p.education || []).map((e, i) => [i ? el('br') : null, pick(e, lang)])),
     el('div', { class: 'k' }, t('ui.interests', lang)),
     el('div', { class: 'v' }, pick(p.interests, lang)));
 
@@ -34,7 +34,7 @@ export function renderAbout(host, { data, lang }) {
     el('div', { class: 'main' },
       sectionHead('about', lang),
       el('div', { class: 'name' }, p.name, el('span', { class: 'role' }, pick(p.role, lang))),
-      p.bio.map(b => el('p', {}, pick(b, lang))),
+      (p.bio || []).map(b => el('p', {}, pick(b, lang))),
       contacts),
     card));
 }
