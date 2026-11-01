@@ -2,7 +2,26 @@
 
 export const CONFIG = Object.freeze({
   SCREEN_COVER: 0.75,       // bezel width / viewport width when the screen is pushed in
-  MAX_HEIGHT_COVER: 0.9,    // never let the bezel exceed this share of the viewport height
+  MAX_HEIGHT_COVER: 0.94,   // never let the bezel exceed this share of the viewport height (16:9 still gets the full 75%)
+
+  // film strip feel (values tuned in the spike)
+  FILM: Object.freeze({
+    PITCH: 1.2,             // world units between frames
+    COAST_DECAY: 2.6,       // velocity decay per second while coasting
+    COAST_TO_SPRING_V: 1.0, // below this speed the strip snaps to a frame
+    FLICK_V: 1.2,           // release speed that counts as a flick
+    SPRING_K: 170,
+    SPRING_ZETA: 0.72,      // slightly under-damped: a tiny "click" overshoot
+    RUBBER: 0.35,           // drag resistance past either end
+    WHEEL_GAIN: 0.006,
+    WHEEL_MAX_V: 14,
+  }),
+
+  // load / unload choreography, seconds
+  TIMING: Object.freeze({
+    KNOB: 0.35, ZOOM_START: 0.25, ZOOM_DUR: 1.15, LOAD_DONE: 1.45,
+    UNZOOM_DUR: 1.0, KNOB_BACK_START: 0.65, UNLOAD_DONE: 1.05,
+  }),
 });
 
 /** Normalise a deploy path (e.g. "portfolio") into Vite's `base` form ("/portfolio/"). */
