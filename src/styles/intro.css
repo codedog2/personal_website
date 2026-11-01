@@ -1,0 +1,25 @@
+.intro { position: fixed; inset: 0; z-index: 50; background: #050302; display: grid; place-items: center; overflow: hidden;
+  transition: opacity .6s ease; }
+.intro.out { opacity: 0; pointer-events: none; }
+.intro-glow { position: absolute; left: 50%; top: 34%; width: 70vmax; height: 70vmax; transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255,190,110,.42) 0%, rgba(255,150,60,.14) 22%, rgba(0,0,0,0) 55%);
+  opacity: 0; transition: opacity .9s ease-out; }
+.intro.lit .intro-glow { opacity: 1; animation: intro-flicker 2.8s infinite steps(1); }
+.intro.seen .intro-glow { opacity: 1; transition: none; }
+@keyframes intro-flicker { 0%, 100% { opacity: 1 } 7% { opacity: .82 } 9% { opacity: 1 } 51% { opacity: .9 } 53% { opacity: 1 } }
+.intro-grain { position: absolute; inset: -50%; opacity: .09; pointer-events: none; animation: intro-grain .5s steps(4) infinite;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+@keyframes intro-grain { 0% { transform: translate(0, 0) } 25% { transform: translate(-3%, 2%) } 50% { transform: translate(2%, -3%) } 75% { transform: translate(-2%, -1%) } }
+.intro-text { position: relative; text-align: center; padding: 0 24px; max-width: 900px; }
+.intro-q { font-family: var(--mono); color: #f3dcb4; font-size: clamp(18px, 2.6vw, 32px); letter-spacing: .04em; min-height: 1.4em;
+  text-shadow: 0 0 18px rgba(255,170,80,.45); }
+.intro-q.typing::after { content: "▌"; margin-left: 2px; animation: intro-caret .7s steps(1) infinite; }
+@keyframes intro-caret { 50% { opacity: 0 } }
+.intro-a { margin-top: 18px; font-family: var(--serif); font-style: italic; font-size: clamp(16px, 1.8vw, 22px); color: var(--dim);
+  opacity: 0; transform: translateY(6px); transition: opacity .8s, transform .8s; }
+.intro-a.show { opacity: 1; transform: none; }
+.intro-loading { position: absolute; bottom: 12vh; left: 0; right: 0; text-align: center; font-family: var(--serif); font-style: italic; color: var(--dim); }
+.intro-skip { position: absolute; right: 24px; bottom: 22px; font-family: var(--mono); font-size: 12px; letter-spacing: 2px; color: var(--dim);
+  background: none; border: 1px solid #4a3d2e; border-radius: 7px; padding: 6px 12px; cursor: pointer; }
+.intro-skip:hover { color: var(--amber); border-color: var(--amber); }
+.intro.calm .intro-glow, .intro.calm .intro-grain { animation: none; }

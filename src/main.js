@@ -4,6 +4,7 @@ import { initLang } from './core/i18n.js';
 import { readPref } from './core/prefs.js';
 import { chooseView, hasWebGL, mountView, switchView } from './core/mode.js';
 import { createSound } from './core/sound.js';
+import { runIntro } from './intro/intro.js';
 
 const root = document.getElementById('app');
 document.documentElement.lang = initLang();
@@ -22,4 +23,9 @@ const mounted = mountView(view, {
   mount2d: () => import('./flat/flat2d.js').then(m => m.mountFlat(root, { sound, switchView })),
 });
 
-await mounted;
+await runIntro(document.body, {
+  ready: mounted,
+  seen: view === '2d' || readPref('introSeen', false),   // 2D always gets the short version
+  lang: document.documentElement.lang,
+  reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
+});
