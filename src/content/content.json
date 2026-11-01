@@ -1,0 +1,89 @@
+{
+  "profile": {
+    "name": "Terry (Yaowei) Feng",
+    "role": { "en": "Software Engineer", "zh": "软件工程师", "ja": "ソフトウェアエンジニア" },
+    "bio": [
+      {
+        "en": "A software engineer with an interdisciplinary background, interested in game development, cloud and interactive systems. This paragraph is placeholder text.",
+        "zh": "一名有跨学科背景的软件工程师，关注游戏开发、云计算与交互系统。这段是占位文字。",
+        "ja": "学際的なバックグラウンドを持つソフトウェアエンジニア。ゲーム開発、クラウド、インタラクティブシステムに関心があります。この段落は仮の文章です。"
+      },
+      {
+        "en": "From social design to software engineering — building systems that are reliable and a little bit delightful.",
+        "zh": "从社会设计到软件工程——做既可靠又有点意思的系统。",
+        "ja": "ソーシャルデザインからソフトウェアエンジニアリングへ。信頼できて、少し楽しいシステムをつくる。"
+      }
+    ],
+    "photo": "images/portrait.svg",
+    "contacts": [
+      { "kind": "email", "label": "EMAIL", "value": "name@example.com", "href": "mailto:name@example.com" },
+      { "kind": "github", "label": "GITHUB", "value": "github.com/username", "href": "https://github.com/username" },
+      { "kind": "linkedin", "label": "LINKEDIN", "value": "linkedin.com/in/username", "href": "https://www.linkedin.com/in/username" }
+    ],
+    "education": [
+      { "en": "Rikkyo University · M.A. Social Design", "zh": "立教大学 · 社会设计 硕士", "ja": "立教大学 · 社会デザイン 修士" },
+      { "en": "ECUST · B.A. Japanese Studies", "zh": "华东理工大学 · 日语 学士", "ja": "華東理工大学 · 日本語 学士" }
+    ],
+    "interests": { "en": "Game Dev · Cloud · Interactive Systems · Technology & Society", "zh": "游戏开发 · 云计算 · 交互系统 · 技术与社会", "ja": "ゲーム開発 · クラウド · インタラクティブシステム · テクノロジーと社会" }
+  },
+
+  "projects": [
+    {
+      "code": "P-01",
+      "name": { "en": "Localization Tool", "zh": "本地化工具", "ja": "ローカライズツール" },
+      "summary": { "en": "Keeps string tables in sync across languages.", "zh": "让多语言文本表保持同步。", "ja": "多言語の文字列テーブルを同期します。" },
+      "overview": { "en": "A placeholder description of a localization helper that syncs string tables across languages and flags missing entries.", "zh": "占位简介：一个同步多语言文本表、标出缺失条目的本地化工具。", "ja": "仮の説明：多言語の文字列テーブルを同期し、欠けている項目を知らせるツール。" },
+      "image": "images/p01.svg",
+      "stack": ["python", "json"],
+      "links": { "github": "https://github.com/username/localization-tool", "demo": null }
+    },
+    {
+      "code": "P-02",
+      "name": { "en": "AWS Learning", "zh": "AWS 学习", "ja": "AWS 学習" },
+      "summary": { "en": "Cloud experiments: pipelines, storage, serverless.", "zh": "云端实验：部署流水线、存储、无服务器。", "ja": "クラウド実験：パイプライン、ストレージ、サーバーレス。" },
+      "overview": { "en": "A placeholder description of cloud experiments: deployment pipelines, storage and serverless functions.", "zh": "占位简介：部署流水线、存储与无服务器函数等云端实验。", "ja": "仮の説明：デプロイパイプライン、ストレージ、サーバーレス関数の実験。" },
+      "image": null,
+      "stack": ["aws", "docker", "python"],
+      "links": { "github": null, "demo": null }
+    },
+    {
+      "code": "P-03",
+      "name": { "en": "Poké-like RPG", "zh": "宝可梦式 RPG", "ja": "ポケモン風 RPG" },
+      "summary": { "en": "A dice-based monster battler built with Godot 4.", "zh": "用 Godot 4 做的骰子对战怪兽 RPG。", "ja": "Godot 4 で作ったダイス式モンスターバトル。" },
+      "overview": { "en": "A turn-based monster RPG built with Godot 4: dice battles, data-driven monsters and moves, branching NPC dialogue and save/load.", "zh": "用 Godot 4 做的回合制怪兽 RPG：骰子对战、数据驱动的怪兽与招式、分支 NPC 对话和存读档。", "ja": "Godot 4 製のターン制モンスター RPG。ダイスバトル、データ駆動のモンスターと技、分岐する NPC 会話、セーブ／ロード。" },
+      "image": "images/p03.svg",
+      "stack": ["godot", "gdscript", "json"],
+      "links": { "github": "https://github.com/username/dice-rpg", "demo": null }
+    }
+  ],
+
+  "skills": [
+    { "group": "LANGUAGES", "items": [
+      { "id": "python", "name": "Python", "level": 4, "years": { "en": "3 yrs", "zh": "3 年", "ja": "3 年" }, "note": { "en": "Scripts, data tools, P-01.", "zh": "脚本、数据工具、P-01。", "ja": "スクリプト、データツール、P-01。" } },
+      { "id": "gdscript", "name": "GDScript", "level": 4, "years": { "en": "2 yrs", "zh": "2 年", "ja": "2 年" }, "note": { "en": "Typed, signal-driven architecture in P-03.", "zh": "P-03 中带类型、信号驱动的架构。", "ja": "P-03 の型付き・シグナル駆動設計。" } },
+      { "id": "csharp", "name": "C#", "level": 3, "years": { "en": "1 yr", "zh": "1 年", "ja": "1 年" }, "note": { "en": "Godot C# side.", "zh": "Godot 的 C# 部分。", "ja": "Godot の C# 部分。" } },
+      { "id": "javascript", "name": "JavaScript", "level": 3, "years": { "en": "2 yrs", "zh": "2 年", "ja": "2 年" }, "note": { "en": "This very website.", "zh": "就是这个网站。", "ja": "このサイトそのもの。" } }
+    ] },
+    { "group": "ENGINES", "items": [
+      { "id": "godot", "name": "Godot 4", "level": 4, "years": { "en": "2 yrs", "zh": "2 年", "ja": "2 年" }, "note": { "en": "Battle, dialogue and save systems in P-03.", "zh": "P-03 的对战、对话和存档系统。", "ja": "P-03 のバトル・会話・セーブシステム。" } },
+      { "id": "threejs", "name": "three.js", "level": 2, "years": { "en": "< 1 yr", "zh": "不到 1 年", "ja": "1 年未満" }, "note": { "en": "The archive machine you are looking at.", "zh": "你正在看的这台档案机器。", "ja": "いま見ているアーカイブ装置。" } }
+    ] },
+    { "group": "CLOUD", "items": [
+      { "id": "aws", "name": "AWS", "level": 3, "years": { "en": "1 yr", "zh": "1 年", "ja": "1 年" }, "note": { "en": "EC2, S3, Lambda in P-02.", "zh": "P-02 中的 EC2、S3、Lambda。", "ja": "P-02 の EC2、S3、Lambda。" } },
+      { "id": "docker", "name": "Docker", "level": 2, "years": { "en": "1 yr", "zh": "1 年", "ja": "1 年" }, "note": { "en": "Containerised deployments.", "zh": "容器化部署。", "ja": "コンテナ化したデプロイ。" } }
+    ] },
+    { "group": "TOOLS", "items": [
+      { "id": "git", "name": "Git", "level": 4, "years": { "en": "4 yrs", "zh": "4 年", "ja": "4 年" }, "note": { "en": "Daily version control and GitHub collaboration.", "zh": "日常版本管理与 GitHub 协作。", "ja": "日々のバージョン管理と GitHub での協働。" } },
+      { "id": "json", "name": "JSON", "level": 5, "years": { "en": "4 yrs", "zh": "4 年", "ja": "4 年" }, "note": { "en": "Data-driven design everywhere.", "zh": "处处数据驱动。", "ja": "あらゆる所でデータ駆動。" } },
+      { "id": "blender", "name": "Blender", "level": 2, "years": { "en": "1 yr", "zh": "1 年", "ja": "1 年" }, "note": { "en": "Simple modelling.", "zh": "简单建模。", "ja": "簡単なモデリング。" } }
+    ] }
+  ],
+
+  "certificates": [
+    { "name": { "en": "AWS Cloud Practitioner" }, "icon": "☁", "status": "earned", "issuer": { "en": "Amazon Web Services" }, "date": "2025-06", "credentialId": "PLACEHOLDER-001", "url": "https://example.com/credential/001" },
+    { "name": { "en": "JLPT N1", "zh": "日本语能力测试 N1", "ja": "日本語能力試験 N1" }, "icon": "日", "status": "earned", "issuer": { "en": "Japan Foundation", "zh": "日本国际交流基金", "ja": "国際交流基金" }, "date": "2023-12", "credentialId": null, "url": null },
+    { "name": { "en": "Placeholder Certificate", "zh": "占位证书", "ja": "仮の資格" }, "icon": "⌘", "status": "earned", "issuer": { "en": "Some Institute" }, "date": "2024-03", "credentialId": null, "url": "https://example.com/credential/003" },
+    { "name": { "en": "AWS Solutions Architect – Associate" }, "icon": "◈", "status": "in-progress", "issuer": { "en": "Amazon Web Services" }, "date": "2027", "credentialId": null, "url": null },
+    { "name": { "en": "Placeholder Certificate", "zh": "占位证书", "ja": "仮の資格" }, "icon": "✦", "status": "in-progress", "issuer": { "en": "Some Institute" }, "date": "2027", "credentialId": null, "url": null }
+  ]
+}
