@@ -22,6 +22,18 @@ export const CONFIG = Object.freeze({
     KNOB: 0.35, ZOOM_START: 0.25, ZOOM_DUR: 1.15, LOAD_DONE: 1.45,
     UNZOOM_DUR: 1.0, KNOB_BACK_START: 0.65, UNLOAD_DONE: 1.05,
   }),
+
+  // scene layout (world units; the spike's final arrangement)
+  CAMERA: Object.freeze({ POS: [0, 2.55, 6.6], LOOK: [0, 1.45, 0], FOV: 34 }),
+  FILM_CENTER: [0, 0.55, 0.95],
+  BEND: 0.045,              // how much the strip curves back toward the reels
+  TILT: -0.62,              // strip leans back at the reading gate
+  LEAD: 5,                  // leader frames on each side
+  REEL: Object.freeze({ X: 3.05, R: 0.85 }),
+  SCREEN: Object.freeze({ REST: [0.35, 2.12, -1.05], BEZEL: [2.62, 1.82], GLASS: [2.3, 1.5], SLIDE: 0.9 }),
+  LOAD_KNOB: [2.05, 1.0, -0.05],
+  LANG_KNOB: [-2.05, 0.95, -0.05],
+  LAMP: [3.3, 0.36, -1.7],
 });
 
 /** Normalise a deploy path (e.g. "portfolio") into Vite's `base` form ("/portfolio/"). */
