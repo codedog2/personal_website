@@ -27,7 +27,8 @@ jobs:
       - run: npm test
       - run: npm run build
         env:
-          BASE_PATH: ${{ vars.BASE_PATH || '/' }}
+          # <user>.github.io repos serve from the root; any other repo serves from /<repo-name>/
+          BASE_PATH: ${{ vars.BASE_PATH || (endsWith(github.event.repository.name, '.github.io') && '/' || github.event.repository.name) }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

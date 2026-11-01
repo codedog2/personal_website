@@ -48,7 +48,7 @@ npm run preview    # 预览打包结果
 推送到 GitHub 的 `main` 分支后，`.github/workflows/deploy.yml` 会自动测试、打包并发布到 GitHub Pages。
 
 1. 仓库 Settings → Pages → Source 选 **GitHub Actions**。
-2. 仓库名是 `<用户名>.github.io` 时无需额外设置；如果放在别的仓库名下（如 `portfolio`），在 Settings → Variables 里加一个仓库变量 `BASE_PATH=portfolio`。
+2. 发布路径会按仓库名自动设置：仓库叫 `<用户名>.github.io` 时网址是 `https://<用户名>.github.io/`；叫别的名字（比如现在的 `personal_website`）时网址是 `https://<用户名>.github.io/personal_website/`。以后绑定自己的域名时，在 Settings → Variables 里加仓库变量 `BASE_PATH=/` 即可。
 
 ## 3D 模型
 
