@@ -16,7 +16,7 @@ const RIBBON_SEGMENTS = 64;
 const LABEL_FONT = {
   en: 'italic 500 84px "Cormorant Garamond"',
   zh: '600 72px "Noto Serif SC"',
-  ja: '600 72px "Noto Serif JP"',
+  ja: '72px "MS Mincho", "ＭＳ 明朝", "Noto Serif JP"',   // MS Mincho where installed (Windows)
 };
 
 /** Pose at distance s along the strip from the reading gate (s = 0). */

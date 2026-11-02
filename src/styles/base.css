@@ -11,7 +11,10 @@
   --mono: "IBM Plex Mono", ui-monospace, monospace;
   --body: "Noto Serif SC", "Noto Serif JP", "Cormorant Garamond", serif;
 }
-:lang(ja) { --body: "Noto Serif JP", "Noto Serif SC", serif; }
+:lang(ja) {   /* Japanese: MS Mincho (Windows), Noto Serif JP elsewhere; never fall through to Chinese glyphs */
+  --serif: "Cormorant Garamond", "MS Mincho", "ＭＳ 明朝", "Noto Serif JP", serif;
+  --body: "MS Mincho", "ＭＳ 明朝", "Noto Serif JP", serif;
+}
 
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }

@@ -174,7 +174,7 @@ export function buildMachine(stage, lang) {
     g.font = '500 22px "IBM Plex Mono"'; g.fillText(now.date, w - 70, 128); g.textAlign = 'left';
     return { g, w, h };
   }
-  const serifFor = l => (l === 'zh' ? '"Noto Serif SC"' : l === 'ja' ? '"Noto Serif JP"' : '"Cormorant Garamond"');
+  const serifFor = l => (l === 'zh' ? '"Noto Serif SC"' : l === 'ja' ? '"MS Mincho", "ＭＳ 明朝", "Noto Serif JP"' : '"Cormorant Garamond"');
 
   let idleGen = 0;
   async function drawIdle(index, l) {

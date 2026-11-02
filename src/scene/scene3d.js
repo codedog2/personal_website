@@ -63,7 +63,7 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     soundBtn.textContent = t(sound.enabled ? 'ui.sound.on' : 'ui.sound.off', lang);
     soundBtn.classList.toggle('on', sound.enabled);
     simpleBtn.textContent = t('ui.view.simple', lang);
-    exitLabel.textContent = `◀ ${t('ui.back', lang)}`;
+    exitLabel.textContent = `← ${t('ui.back', lang)}`;
   }
 
   // ---------------------------------------------------------------- reading state
@@ -71,7 +71,7 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
 
   // ---------------------------------------------------------------- greeting: the first thing on the pushed-in screen
   const greetingData = gatherGreetingData().catch(() => null);   // starts now, overlaps the intro
-  const GREETING_HOLD_MS = 6000;
+  const GREETING_HOLD_MS = 3000;   // after the last line is typed
   let greetingMode = false, greetingPage = null, greetingTimer = 0;
   /** Called just before the intro fades: jump straight to the pushed-in screen showing the greeting. */
   function greet() {

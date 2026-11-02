@@ -194,7 +194,7 @@ export function drawDial(canvas, labels, labelR = 0.6) {
   }
   g.fillStyle = '#ecd3a0'; g.textAlign = 'center'; g.textBaseline = 'middle';
   for (const { text, angle, size = 40 } of labels) {
-    g.save(); g.translate(c, c); g.rotate(angle); g.font = `500 ${size}px "IBM Plex Mono", "Noto Serif SC", "Noto Serif JP"`;
+    g.save(); g.translate(c, c); g.rotate(angle); g.font = `500 ${size}px "IBM Plex Mono", "MS Mincho", "ＭＳ 明朝", "Noto Serif JP", "Noto Serif SC"`;
     g.fillText(text, 0, -labelR * c); g.restore();
   }
 }
