@@ -7,7 +7,6 @@ import { LANGS, getLang, setLang, onLangChange, pick, t } from '../core/i18n.js'
 import { renderSection } from '../sections/index.js';
 import { el } from '../sections/dom.js';
 import { createStage } from './stage.js';
-import { loadModels } from './models.js';
 import { buildMachine } from './machine.js';
 import { buildFilm } from './film.js';
 import { createFilm, dragStart, dragMove, dragEnd, wheel, nudge, goTo, stepFilm, filmIndex, isSettled } from './filmPhysics.js';
@@ -28,17 +27,10 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
   } catch (err) {
     throw new Error(`WebGL unavailable: ${err.message}`);
   }
-  let models;
-  try {
-    models = await loadModels(import.meta.env.BASE_URL);
-  } catch (err) {
-    stage.dispose();                                   // free the GL context before the 2D fallback takes over
-    throw err;
-  }
 
   const data = getContent();
   let lang = getLang();
-  const machine = buildMachine(stage, models, lang);
+  const machine = buildMachine(stage, lang);
   const film = buildFilm(stage, lang);
   await Promise.all([film.relabel(lang), machine.screen.drawIdle(0, lang)]);   // labels painted with the right glyphs before first frame
   const physics = createFilm({ count: SECTIONS.length });

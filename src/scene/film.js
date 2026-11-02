@@ -10,7 +10,7 @@ import { canvasTex, drawFrame, ensureFonts } from './textures.js';
 const { FILM_CENTER: [CX, CY, CZ], BEND, TILT, LEAD, REEL } = CONFIG;
 export const STRIP_END = CONFIG.STRIP_END;
 const P = CONFIG.FILM.PITCH;
-const FW = 1.2, FH = 0.88;
+const FW = P, FH = P * 470 / 640;     // frame keeps the canvas aspect
 const RIBBON_SEGMENTS = 64;
 
 const LABEL_FONT = {
@@ -33,7 +33,7 @@ export function reelHub(side) {
 
 /** Where the film leaves the top of the guide roller at a strip end. */
 export function guideExit(side) {
-  return new THREE.Vector3(side * (STRIP_END + 0.09), 1.02, REEL.Z);
+  return new THREE.Vector3(side * (STRIP_END + 0.09), 0.96, REEL.Z);
 }
 
 /** Path of the film from the guide roller (t = 0) up to the inner side of a reel's film pack (t = 1).

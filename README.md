@@ -41,7 +41,7 @@ npm run preview    # 预览打包结果
 - `SCREEN_COVER`：载入后屏幕占画面宽度的比例，默认 `0.75`。
 - `FILM`：卷胶片的手感（惯性衰减、吸附弹簧强度、回弹程度、滚轮灵敏度）。
 - `TIMING`：旋钮转动、屏幕推近、退出的时长。
-- `CAMERA`、`REEL`、`SCREEN`、`LOAD_KNOB`、`LANG_KNOB`、`LAMP`：场景布局。
+- `CAMERA`、`REEL`、`SCREEN`、`RIG`、`CONSOLE`、`LAMP`、`STRIP_END`：场景布局。
 
 ## 发布
 
@@ -50,8 +50,15 @@ npm run preview    # 预览打包结果
 1. 仓库 Settings → Pages → Source 选 **GitHub Actions**。
 2. 发布路径会按仓库名自动设置：仓库叫 `<用户名>.github.io` 时网址是 `https://<用户名>.github.io/`；叫别的名字（比如现在的 `personal_website`）时网址是 `https://<用户名>.github.io/personal_website/`。以后绑定自己的域名时，在 Settings → Variables 里加仓库变量 `BASE_PATH=/` 即可。
 
-## 3D 模型
+## 3D 场景
 
-模型来自 [Poly Haven](https://polyhaven.com)，CC0 授权，详见 [public/models/LICENSE.md](public/models/LICENSE.md)。`npm run models` 会重新下载并压缩它们。
+场景里的机器（屏幕、悬挂机械臂、转轮、导轮闸、旋钮面板、吊灯）全部用代码生成，没有外部模型文件。
+
+## 开场问候与隐私
+
+开场结束后，屏幕上会显示一段问候：访客所在城市、运营商、估算网速、提供网页的 CDN 节点和连接状况。
+- 城市和运营商：网页会请求 [ipapi.co](https://ipapi.co) 查询访客 IP，这意味着访客的 IP 会发送给这家第三方服务；结果只显示给访客本人，网站不保存。免费额度约每天 1000 次，超出或失败时显示"未知"。
+- 节点：读取 GitHub Pages（Fastly）回应头里的 `x-served-by`，本地预览时显示 unknown。
+- 网速：用页面资源的实际下载时间估算，只是参考值。
 
 `spike/` 是早期的试验版，只作参考，不会被发布。

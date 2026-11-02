@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { CONFIG } from '../src/config.js';
 import { ribbonCurve, reelHub, guideExit, STRIP_END } from '../src/scene/film.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
@@ -31,3 +32,9 @@ for (const side of [-1, 1]) {
     for (let k = 0; k <= 1; k += 0.1) expect(Math.abs(c.getTangent(k).z)).toBeLessThan(0.35);
   });
 }
+
+test('when the film is settled, each strip end falls exactly between two whole frames', () => {
+  const P = CONFIG.FILM.PITCH, edges = STRIP_END / P - 0.5;
+  expect(Math.abs(edges - Math.round(edges))).toBeLessThan(1e-9);
+  expect(Math.round(edges)).toBeGreaterThanOrEqual(2);          // at least two whole frames on each side of the gate
+});

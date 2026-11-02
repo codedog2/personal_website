@@ -15,7 +15,7 @@ import { clockText } from './clock.js';
 const V = (a) => new THREE.Vector3(...a);
 const UP = new THREE.Vector3(0, 1, 0);
 
-export function buildMachine(stage, models, lang) {
+export function buildMachine(stage, lang) {
   const { scene } = stage;
   const grunge = grungeTex();
   const M = {
@@ -25,6 +25,7 @@ export function buildMachine(stage, models, lang) {
     ironMid: new THREE.MeshStandardMaterial({ color: 0x4a3f33, metalness: 0.8, roughness: 0.85, roughnessMap: grunge }),
     wood: new THREE.MeshStandardMaterial({ map: woodTex(), roughness: 0.62 }),
     glow: new THREE.MeshBasicMaterial({ color: 0xffa040 }),
+    bulb: new THREE.MeshStandardMaterial({ color: 0xffe0a8, emissive: 0xffc070, emissiveIntensity: 9 }),
     pointer: new THREE.MeshStandardMaterial({ color: 0xf2e2c0, roughness: 0.4 }),
   };
 
@@ -112,8 +113,8 @@ export function buildMachine(stage, models, lang) {
 
   // ---- reading gate: light box below, brass frame with a glowing inner edge
   const gate = new THREE.Group(); filmPose(0, gate); scene.add(gate);
-  mesh(new RoundedBoxGeometry(1.36, 0.82, 0.14, 2, 0.03), M.iron, [0, 0, -0.1], gate);
-  const gw = 1.12, gh = 0.66, gt = 0.035;
+  mesh(new RoundedBoxGeometry(1.13, 0.68, 0.14, 2, 0.03), M.iron, [0, 0, -0.1], gate);
+  const gw = 0.93, gh = 0.55, gt = 0.03;
   for (const [x, y, w, h] of [[0, gh / 2, gw + gt, gt], [0, -gh / 2, gw + gt, gt], [gw / 2, 0, gt, gh], [-gw / 2, 0, gt, gh]]) mesh(new THREE.BoxGeometry(w, h, 0.03), M.brass, [x, y, 0.03], gate);
   for (const [x, y, w, h] of [[0, gh / 2 - 0.022, gw - 0.02, 0.008], [0, -gh / 2 + 0.022, gw - 0.02, 0.008], [gw / 2 - 0.022, 0, 0.008, gh - 0.03], [-gw / 2 + 0.022, 0, 0.008, gh - 0.03]]) {
     mesh(new THREE.PlaneGeometry(w, h), M.glow, [x, y, 0.047], gate).castShadow = false;
@@ -122,11 +123,11 @@ export function buildMachine(stage, models, lang) {
   const steelPin = new THREE.MeshStandardMaterial({ color: 0xb8b4ac, metalness: 1, roughness: 0.3 });
   for (const side of [-1, 1]) {
     const box = new THREE.Group(); filmPose(side * (CONFIG.STRIP_END + 0.09), box); scene.add(box);
-    mesh(new RoundedBoxGeometry(0.17, 0.95, 0.1, 3, 0.025), M.iron, [0, 0, -0.01], box);            // slim gate hugging the film
-    for (const y of [-0.47, 0.47]) mesh(new RoundedBoxGeometry(0.2, 0.03, 0.13, 2, 0.01), M.brass, [0, y, -0.01], box);
-    mesh(new THREE.BoxGeometry(0.11, 0.62, 0.006), M.brassDark, [0, 0, 0.042], box);                 // engraved face plate
-    for (const y of [-0.27, 0.27]) mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.01, 12).rotateX(Math.PI / 2), M.brass, [0, y, 0.048], box);
-    mesh(new THREE.BoxGeometry(0.006, 0.4, 0.004), M.iron, [0, 0, 0.046], box);                      // film slot
+    mesh(new RoundedBoxGeometry(0.17, 0.82, 0.1, 3, 0.025), M.iron, [0, 0, -0.01], box);            // slim gate hugging the film
+    for (const y of [-0.41, 0.41]) mesh(new RoundedBoxGeometry(0.2, 0.03, 0.13, 2, 0.01), M.brass, [0, y, -0.01], box);
+    mesh(new THREE.BoxGeometry(0.11, 0.54, 0.006), M.brassDark, [0, 0, 0.042], box);                 // engraved face plate
+    for (const y of [-0.23, 0.23]) mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.01, 12).rotateX(Math.PI / 2), M.brass, [0, y, 0.048], box);
+    mesh(new THREE.BoxGeometry(0.006, 0.34, 0.004), M.iron, [0, 0, 0.046], box);                     // film slot
     const exit = guideExit(side), rollerR = 0.045, rx = exit.x - side * rollerR;
     mesh(new THREE.CylinderGeometry(rollerR, rollerR, CONFIG.REEL.DEPTH * 1.25, 32).rotateX(Math.PI / 2), M.brass, [rx, exit.y - 0.01, exit.z]);
     for (const dz of [-1, 1]) mesh(new THREE.CylinderGeometry(rollerR * 1.25, rollerR * 1.25, 0.008, 32).rotateX(Math.PI / 2), M.brassDark, [rx, exit.y - 0.01, exit.z + dz * CONFIG.REEL.DEPTH * 0.65]);
@@ -222,22 +223,26 @@ export function buildMachine(stage, models, lang) {
   let langTarget = -LANG_ANGLE[lang];
   langKnob.k.rotation.z = langTarget;
 
-  // ---- desk lamp lighting the gate
+  // ---- lamp hanging from the front cross beam on a jointed brass arm, aimed at the reading gate
   const FILM_C = V(CONFIG.FILM_CENTER);
   const [lx, ly, lz] = CONFIG.LAMP;
-  const lamp = models.lamp;
-  lamp.position.set(lx, ly, lz); lamp.rotation.y = Math.atan2(FILM_C.x - lx, FILM_C.z - lz) + Math.PI; lamp.scale.setScalar(4.6);
-  scene.add(lamp); lamp.updateMatrixWorld(true);
-  let lampHead = new THREE.Vector3(lx - 1, 3.2, lz + 1);
-  lamp.traverse(o => {
-    if (!o.isMesh) return;
-    o.castShadow = false;                                  // the spot sits inside the shade
-    if (/_light$/.test(o.material.name)) {
-      o.material = new THREE.MeshStandardMaterial({ color: 0xffe0a8, emissive: 0xffc070, emissiveIntensity: 9 });
-      lampHead = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
-    }
-  });
-  const spot = new THREE.SpotLight(0xffb066, 95, 0, 0.42, 0.65, 2);
+  const knuckle = new THREE.Vector3(lx, ly + 0.42, lz);
+  rod(new THREE.Vector3(lx, BOOM_Y, BEAM_Z), knuckle, 0.016, M.brass);
+  mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.06, 16), M.brassDark, [lx, BOOM_Y - 0.03, BEAM_Z]);   // clamp on the beam
+  mesh(new THREE.SphereGeometry(0.04, 16, 12), M.brass, [knuckle.x, knuckle.y, knuckle.z]);
+  const shade = group([lx, ly, lz]); shade.lookAt(FILM_C); shade.updateMatrixWorld(true);
+  rod(knuckle, shade.localToWorld(new THREE.Vector3(0, 0, -0.02)), 0.014, M.brass);
+  const profile = [[0.035, 0], [0.06, 0.05], [0.15, 0.17], [0.22, 0.3], [0.235, 0.34]].map(([r, h]) => new THREE.Vector2(r, h));
+  const shadeGeo = new THREE.LatheGeometry(profile, 64).rotateX(Math.PI / 2);                 // opening faces +z (towards the gate)
+  const outer = mesh(shadeGeo, new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: brassTex.map, bumpMap: brassTex.bump, bumpScale: 0.6,
+    roughnessMap: brassTex.rough, roughness: 0.75, metalness: 1, side: THREE.FrontSide }), [0, 0, 0], shade);
+  const inner = mesh(shadeGeo, new THREE.MeshStandardMaterial({ color: 0xf3e6c8, emissive: 0xffc070, emissiveIntensity: 0.5, roughness: 0.6, side: THREE.BackSide }), [0, 0, 0], shade);
+  mesh(new THREE.TorusGeometry(0.235, 0.008, 8, 64), M.brass, [0, 0, 0.34], shade);
+  mesh(new THREE.CylinderGeometry(0.03, 0.035, 0.08, 20).rotateX(Math.PI / 2), M.ironMid, [0, 0, 0.04], shade);   // socket
+  mesh(new THREE.SphereGeometry(0.055, 20, 14), M.bulb, [0, 0, 0.13], shade);
+  for (const m of [outer, inner]) m.castShadow = false;                                      // the spot sits inside the shade
+  const lampHead = shade.localToWorld(new THREE.Vector3(0, 0, 0.18));
+  const spot = new THREE.SpotLight(0xffb066, 70, 0, 0.5, 0.65, 2);
   spot.position.copy(lampHead); spot.target.position.copy(FILM_C);
   spot.castShadow = true; spot.shadow.mapSize.set(2048, 2048); spot.shadow.bias = -0.0004; spot.shadow.normalBias = 0.02;
   scene.add(spot, spot.target);

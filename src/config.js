@@ -6,7 +6,7 @@ export const CONFIG = Object.freeze({
 
   // film strip feel (values tuned in the spike)
   FILM: Object.freeze({
-    PITCH: 1.2,             // world units between frames
+    PITCH: 1.0,             // world units between frames (= frame width)
     COAST_DECAY: 2.6,       // velocity decay per second while coasting
     COAST_TO_SPRING_V: 1.0, // below this speed the strip snaps to a frame
     FLICK_V: 1.2,           // release speed that counts as a flick
@@ -29,12 +29,12 @@ export const CONFIG = Object.freeze({
   BEND: 0.045,              // how much the strip curves back at its ends
   TILT: -0.62,              // strip leans back at the reading gate
   LEAD: 5,                  // leader frames on each side
-  STRIP_END: 2.4,           // the strip runs into a guide box here; a narrow film runs from its roller up to the reel
+  STRIP_END: 2.5,           // = 2.5 frames: when settled the guide gates sit exactly between whole frames
   REEL: Object.freeze({ X: 2.5, Y: [1.95, 1.55], Z: 0.45, R: 0.46, DEPTH: 0.14 }),   // [left, right] heights differ on purpose; hung on rods
   SCREEN: Object.freeze({ REST: [0, 2.2, -1.05], BEZEL: [2.62, 1.82], GLASS: [2.3, 1.5], SLIDE: 0.9 }),
   RIG: Object.freeze({ COLUMN: [0, -1.85], BOOM_Y: 3.42, BEAM_Z: 0.3 }),   // column foot (x, z); boom height; cross beam depth
   CONSOLE: Object.freeze({ POS: [0, 1.0, 0.15], SIZE: [1.15, 0.36], KNOB_X: 0.3 }),
-  LAMP: [4.7, 0, -3.3],    // far right and back, so its arm stays clear of the reel's rod
+  LAMP: [1.72, 2.5, 0.35],  // shade of the lamp hanging from the front cross beam, aimed at the reading gate
 });
 
 /** Normalise a deploy path (e.g. "portfolio") into Vite's `base` form ("/portfolio/"). */
