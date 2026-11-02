@@ -21,8 +21,9 @@ const view = chooseView({
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const lowPower = devicePixelRatio > 1.5 && (navigator.hardwareConcurrency || 8) <= 4;   // lower resolution, no shadows
 
+let scene = null;
 const mounted = mountView(view, {
-  mount3d: () => import('./scene/scene3d.js').then(m => m.mountScene(root, { sound, switchView, lowPower, calm: reducedMotion })),
+  mount3d: () => import('./scene/scene3d.js').then(m => m.mountScene(root, { sound, switchView, lowPower, calm: reducedMotion })).then(api => { scene = api; }),
   mount2d: () => import('./flat/flat2d.js').then(m => m.mountFlat(root, { sound, switchView })),
 });
 
@@ -32,3 +33,4 @@ await runIntro(document.body, {
   lang: document.documentElement.lang,
   reducedMotion,
 });
+scene?.greet();

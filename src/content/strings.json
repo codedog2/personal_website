@@ -1,47 +1,275 @@
 {
-  "nav.about": { "en": "About", "zh": "关于", "ja": "概要" },
-  "nav.projects": { "en": "Projects", "zh": "项目", "ja": "プロジェクト" },
-  "nav.skills": { "en": "Skills", "zh": "技能", "ja": "スキル" },
-  "nav.certificates": { "en": "Certificates", "zh": "证书", "ja": "資格" },
-
-  "section.about.title": { "en": "About", "zh": "关于", "ja": "概要" },
-  "section.about.tagline": { "en": "Who is behind the archive", "zh": "档案背后的人", "ja": "アーカイブの持ち主" },
-  "section.projects.title": { "en": "Projects", "zh": "项目", "ja": "プロジェクト" },
-  "section.projects.tagline": { "en": "Selected works, reel by reel", "zh": "精选作品，一卷一卷", "ja": "選りすぐりの作品を一巻ずつ" },
-  "section.skills.title": { "en": "Skills", "zh": "技能", "ja": "スキル" },
-  "section.skills.tagline": { "en": "Tools on the workbench", "zh": "工作台上的工具", "ja": "作業台の道具たち" },
-  "section.certificates.title": { "en": "Certificates", "zh": "证书", "ja": "資格" },
-  "section.certificates.tagline": { "en": "Badges earned & in progress", "zh": "已获得与准备中的徽章", "ja": "取得済みと挑戦中のバッジ" },
-
-  "ui.brand.kicker": { "en": "— PERSONAL PORTFOLIO —", "zh": "— 个人作品集 —", "ja": "— ポートフォリオ —" },
-  "ui.back": { "en": "BACK", "zh": "返回", "ja": "戻る" },
-  "ui.esc": { "en": "ESC" },
-  "ui.sound.on": { "en": "♪ SOUND ON", "zh": "♪ 声音 开", "ja": "♪ サウンド オン" },
-  "ui.sound.off": { "en": "♪ SOUND OFF", "zh": "♪ 声音 关", "ja": "♪ サウンド オフ" },
-  "ui.view.simple": { "en": "Simple View", "zh": "简洁版", "ja": "シンプル表示" },
-  "ui.view.3d": { "en": "3D View", "zh": "3D 版", "ja": "3D 表示" },
-  "ui.copy": { "en": "COPY", "zh": "复制", "ja": "コピー" },
-  "ui.copied": { "en": "COPIED", "zh": "已复制", "ja": "コピー済み" },
-  "ui.allProjects": { "en": "← All Projects", "zh": "← 全部项目", "ja": "← プロジェクト一覧" },
-  "ui.overview": { "en": "OVERVIEW", "zh": "简介", "ja": "概要" },
-  "ui.techStack": { "en": "TECH STACK", "zh": "技术栈", "ja": "技術スタック" },
-  "ui.links": { "en": "LINKS", "zh": "链接", "ja": "リンク" },
-  "ui.github": { "en": "GitHub", "zh": "GitHub", "ja": "GitHub" },
-  "ui.demo": { "en": "Live demo", "zh": "在线演示", "ja": "デモ" },
-  "ui.education": { "en": "EDUCATION", "zh": "教育背景", "ja": "学歴" },
-  "ui.interests": { "en": "INTERESTS", "zh": "兴趣方向", "ja": "関心分野" },
-  "ui.viewCredential": { "en": "View credential →", "zh": "查看证书 →", "ja": "証明書を見る →" },
-  "ui.inProgress": { "en": "IN PROGRESS", "zh": "准备中", "ja": "挑戦中" },
-  "ui.earned": { "en": "EARNED", "zh": "已获得", "ja": "取得済み" },
-  "ui.preparing": { "en": "Currently preparing.", "zh": "正在准备中。", "ja": "現在準備中です。" },
-  "ui.credentialId": { "en": "ID", "zh": "编号", "ja": "番号" },
-  "ui.hint.browse": { "en": "DRAG · SCROLL · ← → to browse", "zh": "拖动 · 滚轮 · ← → 浏览", "ja": "ドラッグ · スクロール · ← → で選択" },
-  "ui.hint.load": { "en": "ENTER / click / turn the knob to load", "zh": "回车 / 点击 / 转动旋钮载入", "ja": "Enter / クリック / ノブを回して読み込む" },
-  "ui.screen.load": { "en": "▶ PRESS ENTER OR TURN THE KNOB TO LOAD", "zh": "▶ 按回车或转动旋钮载入", "ja": "▶ ENTER かノブで読み込み" },
-  "ui.lang": { "en": "LANGUAGE", "zh": "语言", "ja": "言語" },
-
-  "intro.question": { "en": "Why should you hire Yaowei (Terry) Feng?", "zh": "你为什么应该录用 Yaowei (Terry) Feng？", "ja": "なぜ Yaowei (Terry) Feng を採用すべきか？" },
-  "intro.answer": { "en": "The answer is in the archive.", "zh": "答案就在档案里。", "ja": "答えはアーカイブの中に。" },
-  "intro.skip": { "en": "SKIP ▸", "zh": "跳过 ▸", "ja": "スキップ ▸" },
-  "intro.loading": { "en": "warming up the lamp…", "zh": "正在预热灯泡…", "ja": "ランプを温めています…" }
+  "nav.about": {
+    "en": "About",
+    "zh": "关于",
+    "ja": "概要"
+  },
+  "nav.projects": {
+    "en": "Projects",
+    "zh": "项目",
+    "ja": "プロジェクト"
+  },
+  "nav.skills": {
+    "en": "Skills",
+    "zh": "技能",
+    "ja": "スキル"
+  },
+  "nav.certificates": {
+    "en": "Certificates",
+    "zh": "证书",
+    "ja": "資格"
+  },
+  "section.about.title": {
+    "en": "About",
+    "zh": "关于",
+    "ja": "概要"
+  },
+  "section.about.tagline": {
+    "en": "Who is behind the archive",
+    "zh": "档案背后的人",
+    "ja": "アーカイブの持ち主"
+  },
+  "section.projects.title": {
+    "en": "Projects",
+    "zh": "项目",
+    "ja": "プロジェクト"
+  },
+  "section.projects.tagline": {
+    "en": "Selected works, reel by reel",
+    "zh": "精选作品，一卷一卷",
+    "ja": "選りすぐりの作品を一巻ずつ"
+  },
+  "section.skills.title": {
+    "en": "Skills",
+    "zh": "技能",
+    "ja": "スキル"
+  },
+  "section.skills.tagline": {
+    "en": "Tools on the workbench",
+    "zh": "工作台上的工具",
+    "ja": "作業台の道具たち"
+  },
+  "section.certificates.title": {
+    "en": "Certificates",
+    "zh": "证书",
+    "ja": "資格"
+  },
+  "section.certificates.tagline": {
+    "en": "Badges earned & in progress",
+    "zh": "已获得与准备中的徽章",
+    "ja": "取得済みと挑戦中のバッジ"
+  },
+  "ui.brand.kicker": {
+    "en": "— PERSONAL PORTFOLIO —",
+    "zh": "— 个人作品集 —",
+    "ja": "— ポートフォリオ —"
+  },
+  "ui.back": {
+    "en": "BACK",
+    "zh": "返回",
+    "ja": "戻る"
+  },
+  "ui.esc": {
+    "en": "ESC"
+  },
+  "ui.sound.on": {
+    "en": "♪ SOUND ON",
+    "zh": "♪ 声音 开",
+    "ja": "♪ サウンド オン"
+  },
+  "ui.sound.off": {
+    "en": "♪ SOUND OFF",
+    "zh": "♪ 声音 关",
+    "ja": "♪ サウンド オフ"
+  },
+  "ui.view.simple": {
+    "en": "Simple View",
+    "zh": "简洁版",
+    "ja": "シンプル表示"
+  },
+  "ui.view.3d": {
+    "en": "3D View",
+    "zh": "3D 版",
+    "ja": "3D 表示"
+  },
+  "ui.copy": {
+    "en": "COPY",
+    "zh": "复制",
+    "ja": "コピー"
+  },
+  "ui.copied": {
+    "en": "COPIED",
+    "zh": "已复制",
+    "ja": "コピー済み"
+  },
+  "ui.allProjects": {
+    "en": "← All Projects",
+    "zh": "← 全部项目",
+    "ja": "← プロジェクト一覧"
+  },
+  "ui.overview": {
+    "en": "OVERVIEW",
+    "zh": "简介",
+    "ja": "概要"
+  },
+  "ui.techStack": {
+    "en": "TECH STACK",
+    "zh": "技术栈",
+    "ja": "技術スタック"
+  },
+  "ui.links": {
+    "en": "LINKS",
+    "zh": "链接",
+    "ja": "リンク"
+  },
+  "ui.github": {
+    "en": "GitHub",
+    "zh": "GitHub",
+    "ja": "GitHub"
+  },
+  "ui.demo": {
+    "en": "Live demo",
+    "zh": "在线演示",
+    "ja": "デモ"
+  },
+  "ui.education": {
+    "en": "EDUCATION",
+    "zh": "教育背景",
+    "ja": "学歴"
+  },
+  "ui.interests": {
+    "en": "INTERESTS",
+    "zh": "兴趣方向",
+    "ja": "関心分野"
+  },
+  "ui.viewCredential": {
+    "en": "View credential →",
+    "zh": "查看证书 →",
+    "ja": "証明書を見る →"
+  },
+  "ui.inProgress": {
+    "en": "IN PROGRESS",
+    "zh": "准备中",
+    "ja": "挑戦中"
+  },
+  "ui.earned": {
+    "en": "EARNED",
+    "zh": "已获得",
+    "ja": "取得済み"
+  },
+  "ui.preparing": {
+    "en": "Currently preparing.",
+    "zh": "正在准备中。",
+    "ja": "現在準備中です。"
+  },
+  "ui.credentialId": {
+    "en": "ID",
+    "zh": "编号",
+    "ja": "番号"
+  },
+  "ui.hint.browse": {
+    "en": "DRAG · SCROLL · ← → to browse",
+    "zh": "拖动 · 滚轮 · ← → 浏览",
+    "ja": "ドラッグ · スクロール · ← → で選択"
+  },
+  "ui.hint.load": {
+    "en": "ENTER / click / turn the knob to load",
+    "zh": "回车 / 点击 / 转动旋钮载入",
+    "ja": "Enter / クリック / ノブを回して読み込む"
+  },
+  "ui.screen.load": {
+    "en": "▶ PRESS ENTER OR TURN THE KNOB TO LOAD",
+    "zh": "▶ 按回车或转动旋钮载入",
+    "ja": "▶ ENTER かノブで読み込み"
+  },
+  "ui.lang": {
+    "en": "LANGUAGE",
+    "zh": "语言",
+    "ja": "言語"
+  },
+  "intro.question": {
+    "en": "Why should you hire Yaowei (Terry) Feng?",
+    "zh": "你为什么应该录用 Yaowei (Terry) Feng？",
+    "ja": "なぜ Yaowei (Terry) Feng を採用すべきか？"
+  },
+  "intro.answer": {
+    "en": "The answer is in the archive.",
+    "zh": "答案就在档案里。",
+    "ja": "答えはアーカイブの中に。"
+  },
+  "intro.skip": {
+    "en": "SKIP ▸",
+    "zh": "跳过 ▸",
+    "ja": "スキップ ▸"
+  },
+  "intro.loading": {
+    "en": "warming up the lamp…",
+    "zh": "正在预热灯泡…",
+    "ja": "ランプを温めています…"
+  },
+  "greet.morning": {
+    "en": "Good morning",
+    "zh": "早上好",
+    "ja": "おはようございます"
+  },
+  "greet.afternoon": {
+    "en": "Good afternoon",
+    "zh": "下午好",
+    "ja": "こんにちは"
+  },
+  "greet.evening": {
+    "en": "Good evening",
+    "zh": "晚上好",
+    "ja": "こんばんは"
+  },
+  "greet.visitor": {
+    "en": "visitor",
+    "zh": "访客",
+    "ja": "ようこそ"
+  },
+  "greet.visitorFrom": {
+    "en": "visitor from {city}",
+    "zh": "来自 {city} 的访客",
+    "ja": "{city} からのお客様"
+  },
+  "greet.isp": {
+    "en": "internet provider",
+    "zh": "运营商",
+    "ja": "プロバイダ"
+  },
+  "greet.speed": {
+    "en": "internet speed",
+    "zh": "网速",
+    "ja": "通信速度"
+  },
+  "greet.node": {
+    "en": "server spot",
+    "zh": "节点位置",
+    "ja": "サーバー拠点"
+  },
+  "greet.unknown": {
+    "en": "unknown",
+    "zh": "未知",
+    "ja": "不明"
+  },
+  "greet.quality.nice": {
+    "en": "nice connection",
+    "zh": "连接良好",
+    "ja": "接続良好"
+  },
+  "greet.quality.poor": {
+    "en": "poor connection",
+    "zh": "连接较差",
+    "ja": "接続不安定"
+  },
+  "greet.quality.unknown": {
+    "en": "connection unknown",
+    "zh": "连接状况未知",
+    "ja": "接続状況不明"
+  },
+  "greet.continue": {
+    "en": "▶ ANY KEY OR CLICK TO CONTINUE",
+    "zh": "▶ 按任意键或点击继续",
+    "ja": "▶ 何かキーを押すかクリックして続ける"
+  }
 }

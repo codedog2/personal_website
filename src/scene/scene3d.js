@@ -13,6 +13,7 @@ import { buildFilm } from './film.js';
 import { createFilm, dragStart, dragMove, dragEnd, wheel, nudge, goTo, stepFilm, filmIndex, isSettled } from './filmPhysics.js';
 import { zoomDistance, loadTimeline, unloadTimeline } from './zoom.js';
 import { READER, nextReader, canBrowse, routeKey } from './readerMachine.js';
+import { gatherGreetingData, greetingLines } from '../core/greeting.js';
 
 const CANVAS_FONTS = ['600 64px "Cormorant Garamond"', 'italic 500 64px "Cormorant Garamond"', '500 32px "IBM Plex Mono"', '600 64px "Noto Serif SC"', '600 64px "Noto Serif JP"'];
 const POWER_ON_AT = 1.2;   // seconds into the load timeline when the screen flickers on
@@ -72,6 +73,23 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     exitLabel.textContent = `◀ ${t('ui.back', lang)}`;
   }
 
+  // ---------------------------------------------------------------- greeting (after the intro)
+  const greetingData = gatherGreetingData().catch(() => null);   // starts now, overlaps the intro
+  let greeting = null;                                           // { lines, shown, holdUntil }
+  async function greet() {
+    const d = await greetingData;
+    if (!d || state !== READER.IDLE) return;
+    const lines = greetingLines(d, lang);
+    await machine.screen.prepareGreeting(lines, lang);
+    greeting = { lines, total: lines.join('\n').length, shown: 0, drawn: -1, holdUntil: null };
+  }
+  function endGreeting() {
+    if (!greeting) return false;
+    greeting = null;
+    machine.screen.drawIdle(filmIndex(physics), lang);
+    return true;
+  }
+
   // ---------------------------------------------------------------- reading state
   let state = READER.IDLE, phase = 0, zt = 0, readingIdx = 0, poweredOn = false;
 
@@ -118,6 +136,7 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
 
   let drag = null;
   function onDown(e) {
+    if (endGreeting()) return;
     if (state === READER.ZOOMED) { unload(); return; }       // clicking the dimmed machine backs out
     if (!canBrowse(state)) return;
     drag = { x: e.clientX, y: e.clientY, lastX: e.clientX, lastT: performance.now(), moved: 0 };
@@ -155,10 +174,12 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
   }
   function onWheel(e) {
     e.preventDefault();
+    endGreeting();
     if (canBrowse(state) && !drag) wheel(physics, e.deltaY + e.deltaX);
   }
   function onKey(e) {
     if (document.querySelector('.intro')) return;        // the scene is still behind the opening sequence
+    if (endGreeting()) { e.preventDefault(); return; }
     const action = routeKey(state, e.key);
     if (action === 'next') nudge(physics, 1);
     else if (action === 'prev') nudge(physics, -1);
@@ -206,7 +227,14 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
       lastIdx = idx; machine.screen.drawIdle(idx, lang);
     }
     const minute = Math.floor(Date.now() / 60000);
-    if (minute !== lastMinute) { lastMinute = minute; machine.screen.drawIdle(idx, lang); }   // keep the screen clock current
+    if (minute !== lastMinute && !greeting) { lastMinute = minute; machine.screen.drawIdle(idx, lang); }   // keep the screen clock current
+    if (greeting) {
+      greeting.shown = Math.min(greeting.total, greeting.shown + dt * 42);
+      const shown = Math.floor(greeting.shown), blink = Math.floor(now / 500);   // redraw on new characters or a cursor blink
+      if (shown !== greeting.drawn || blink !== greeting.blink) { greeting.drawn = shown; greeting.blink = blink; machine.screen.drawGreeting(greeting.lines, shown, lang); }
+      if (shown >= greeting.total && greeting.holdUntil == null) greeting.holdUntil = now + 7000;
+      if (greeting.holdUntil != null && now > greeting.holdUntil) endGreeting();
+    }
     machine.rewinds.left.setSpin(physics.offset / packs[0]); machine.rewinds.right.setSpin(physics.offset / packs[1]);
     machine.setGateGlow(state === READER.IDLE && isSettled(physics) ? 3.2 + Math.sin(time * 3) * 0.6 : 1.4);
 
@@ -255,6 +283,7 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     screenPos(name) { const v = new THREE.Vector3(); (name === 'lang' ? machine.langKnob.group : machine.loadKnob.group).getWorldPosition(v).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; } };
 
   return {
+    greet,
     destroy() {
       cancelAnimationFrame(raf); offLang();
       canvas.removeEventListener('pointerdown', onDown); canvas.removeEventListener('wheel', onWheel);

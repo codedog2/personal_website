@@ -155,30 +155,59 @@ export function buildMachine(stage, models, lang) {
   }), [0, 0, 0.18], rig);
   glass.castShadow = glass.receiveShadow = false;
 
-  let idleGen = 0;
-  async function drawIdle(index, l) {
-    const mine = ++idleGen, id = SECTIONS[index].id;
-    const serifName = l === 'zh' ? '"Noto Serif SC"' : l === 'ja' ? '"Noto Serif JP"' : '"Cormorant Garamond"';
-    await ensureFonts([`600 120px ${serifName}`, `500 46px ${serifName}`], t(`section.${id}.title`, l) + t(`section.${id}.tagline`, l) + t('ui.screen.load', l));
-    if (mine !== idleGen) return;
+  /** Paper background, scanlines and the header (machine name, a status line, the visitor's local time). */
+  function paintScreenBase(status) {
     const c = screenTex.userData.canvas, g = c.getContext('2d'), w = c.width, h = c.height;
     const gr = g.createRadialGradient(w / 2, h * 0.42, 40, w / 2, h / 2, w * 0.62);
     gr.addColorStop(0, '#f0e2c0'); gr.addColorStop(0.7, '#cdb58a'); gr.addColorStop(1, '#8a7350');
     g.fillStyle = gr; g.fillRect(0, 0, w, h);
     g.fillStyle = 'rgba(60,40,20,.07)'; for (let y = 0; y < h; y += 4) g.fillRect(0, y, w, 1);
-    const serif = serifName;
     g.textAlign = 'left'; g.fillStyle = '#5a3a1a'; g.font = '500 26px "IBM Plex Mono"';
     g.fillText('OPTICAL ARCHIVE · READER OR-3', 70, 90);
-    g.fillText(`FRAME ${String(index + 1).padStart(2, '0')} / ${String(SECTIONS.length).padStart(2, '0')}`, 70, 128);
-    const now = clockText();                              // visitor's local time, top right
+    g.fillText(status, 70, 128);
+    const now = clockText();
     g.textAlign = 'right'; g.font = '500 44px "IBM Plex Mono"'; g.fillText(now.time, w - 70, 96);
     g.font = '500 22px "IBM Plex Mono"'; g.fillText(now.date, w - 70, 128); g.textAlign = 'left';
+    return { g, w, h };
+  }
+  const serifFor = l => (l === 'zh' ? '"Noto Serif SC"' : l === 'ja' ? '"Noto Serif JP"' : '"Cormorant Garamond"');
+
+  let idleGen = 0;
+  async function drawIdle(index, l) {
+    const mine = ++idleGen, id = SECTIONS[index].id, serif = serifFor(l);
+    await ensureFonts([`600 120px ${serif}`, `500 46px ${serif}`], t(`section.${id}.title`, l) + t(`section.${id}.tagline`, l) + t('ui.screen.load', l));
+    if (mine !== idleGen) return;
+    const { g } = paintScreenBase(`FRAME ${String(index + 1).padStart(2, '0')} / ${String(SECTIONS.length).padStart(2, '0')}`);
     g.fillStyle = '#2d2117'; g.font = `600 ${l === 'en' ? 150 : 120}px ${serif}`; g.fillText(t(`section.${id}.title`, l), 64, 360);
     g.fillStyle = '#6a4a2a'; g.font = `${l === 'en' ? 'italic ' : ''}500 46px ${serif}`; g.fillText(t(`section.${id}.tagline`, l), 70, 430);
     g.fillStyle = '#7a4a22'; g.font = `500 26px "IBM Plex Mono", ${serif}`; g.fillText(t('ui.screen.load', l), 70, 580);
     screenTex.needsUpdate = true;
   }
   drawIdle(0, lang);
+
+  // ---- greeting: typed lines on the same paper, with a block cursor
+  const GREET_FONT = l => `500 34px "IBM Plex Mono", ${serifFor(l)}`;
+  async function prepareGreeting(lines, l) {
+    await ensureFonts([GREET_FONT(l), `500 26px "IBM Plex Mono", ${serifFor(l)}`], lines.join('') + t('greet.continue', l));
+  }
+  function drawGreeting(lines, shown, l) {
+    idleGen++;                                            // a pending idle redraw must not paint over this
+    const { g, w } = paintScreenBase('> HELLO');
+    g.fillStyle = '#2d2117'; g.font = GREET_FONT(l);
+    let left = shown, y = 230, lastX = 70, lastY = y;
+    for (const [i, line] of lines.entries()) {
+      if (left <= 0) break;
+      const part = line.slice(0, left); left -= line.length + 1;
+      g.font = i === 0 ? `600 44px ${serifFor(l)}` : GREET_FONT(l);
+      g.fillText(part, 70, y);
+      lastX = 70 + g.measureText(part).width; lastY = y;
+      y += i === 0 ? 86 : 62;
+    }
+    const done = shown >= lines.join('\n').length;
+    if (!done || Math.floor(performance.now() / 500) % 2) { g.fillStyle = '#7a4a22'; g.fillRect(lastX + 6, lastY - 30, 20, 36); }
+    if (done) { g.fillStyle = '#7a4a22'; g.font = `500 24px "IBM Plex Mono", ${serifFor(l)}`; g.fillText(t('greet.continue', l), 70, 610); }
+    screenTex.needsUpdate = true;
+  }
 
   // ---- control panel, parallel to the screen, facing the camera; two knobs with their labels on an outer ring
   const { POS: [kx, ky, kz], SIZE: [KW, KH], KNOB_X } = CONFIG.CONSOLE;
@@ -250,7 +279,7 @@ export function buildMachine(stage, models, lang) {
 
   return {
     rewinds,
-    screen: { rig, glass, bezel, restPos: rig.position.clone(), drawIdle },
+    screen: { rig, glass, bezel, restPos: rig.position.clone(), drawIdle, prepareGreeting, drawGreeting },
     loadKnob: {
       group: load.k,
       setTurn(t01) { load.k.rotation.z = -t01 * Math.PI / 2; },   // VIEW -> LOAD
