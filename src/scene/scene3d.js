@@ -49,7 +49,6 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
   // ---------------------------------------------------------------- DOM chrome
   const kicker = el('div', { class: 'kicker' }), role = el('div', { class: 'role' });
   const brand = el('header', { class: 'brand' }, kicker, el('h1', {}, 'Optical Archive'), el('div', { class: 'who' }, data.profile.name), role);
-  const counter = el('div', { class: 'counter', 'aria-live': 'polite' });
   const hint = el('div', { class: 'hint' });
   const soundBtn = el('button', { type: 'button', class: 'chip', onclick: () => { sound.setEnabled(!sound.enabled); soundBtn.blur(); paintChrome(); } });
   const simpleBtn = el('button', { type: 'button', class: 'chip', onclick: () => switchView('2d') });
@@ -59,7 +58,7 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
   const exitLabel = el('span');
   const exit = el('button', { type: 'button', class: 'back', onclick: () => unload() }, exitLabel, exitKey);
   reader.append(exit);                                   // BACK sits in the corner of the paper, outside the scrolling area
-  const shell = el('div', { class: 'oa3d' }, brand, counter, hint, el('div', { class: 'topright' }, soundBtn, simpleBtn), reader);
+  const shell = el('div', { class: 'oa3d' }, brand, hint, el('div', { class: 'topright' }, soundBtn, simpleBtn), reader);
   root.replaceChildren(shell);
   canvas.classList.add('active');
 
@@ -71,12 +70,7 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     soundBtn.classList.toggle('on', sound.enabled);
     simpleBtn.textContent = t('ui.view.simple', lang);
     exitLabel.textContent = `◀ ${t('ui.back', lang)}`;
-    paintCounter();
   }
-  const paintCounter = () => {
-    const i = filmIndex(physics);
-    counter.textContent = `${String(i + 1).padStart(2, '0')} / ${String(SECTIONS.length).padStart(2, '0')}  ·  ${t(`nav.${SECTIONS[i].id}`, lang).toUpperCase()}`;
-  };
 
   // ---------------------------------------------------------------- reading state
   let state = READER.IDLE, phase = 0, zt = 0, readingIdx = 0, poweredOn = false;
@@ -198,7 +192,7 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     Object.assign(reader.style, { left: `${x0 * innerWidth}px`, top: `${(1 - y1) * innerHeight}px`, width: `${(x1 - x0) * innerWidth}px`, height: `${(y1 - y0) * innerHeight}px` });
   }
   const camPos = IDLE_POS.clone(), camLook = IDLE_LOOK.clone(), tPos = new THREE.Vector3(), tLook = new THREE.Vector3(), zPos = new THREE.Vector3(), zLook = new THREE.Vector3();
-  let lastIdx = -1, last = performance.now(), raf = 0;
+  let lastIdx = -1, lastMinute = Math.floor(Date.now() / 60000), last = performance.now(), raf = 0;
 
   function frame(now, dt) {
     const time = now / 1000;
@@ -209,8 +203,10 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     const idx = filmIndex(physics);
     if (idx !== lastIdx) {
       if (lastIdx !== -1) sound.tick();
-      lastIdx = idx; machine.screen.drawIdle(idx, lang); paintCounter();
+      lastIdx = idx; machine.screen.drawIdle(idx, lang);
     }
+    const minute = Math.floor(Date.now() / 60000);
+    if (minute !== lastMinute) { lastMinute = minute; machine.screen.drawIdle(idx, lang); }   // keep the screen clock current
     machine.rewinds.left.setSpin(physics.offset / packs[0]); machine.rewinds.right.setSpin(physics.offset / packs[1]);
     machine.setGateGlow(state === READER.IDLE && isSettled(physics) ? 3.2 + Math.sin(time * 3) * 0.6 : 1.4);
 

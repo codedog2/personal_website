@@ -26,17 +26,22 @@ export function filmPose(s, obj) {
   obj.rotation.set(TILT, Math.atan(2 * BEND * s), 0);
 }
 
+/** Centre of a reel's hub. side: -1 = feed reel (left), 1 = take-up reel (right). */
+export function reelHub(side) {
+  return new THREE.Vector3(side * REEL.X, REEL.Y[side < 0 ? 0 : 1], REEL.Z);
+}
+
 /** Path of the ribbon from the clipped strip end (t = 0) to the outer side of a reel's film pack (t = 1).
  *  side: -1 = feed reel (left), 1 = take-up reel (right). packR: current radius of the wound film. */
 export function ribbonCurve(side, packR) {
   const s = side * STRIP_END;
   const start = new THREE.Vector3(CX + s, CY + BEND * 0.15 * s * s, CZ - BEND * s * s);
   const out = new THREE.Vector3(1, 2 * BEND * 0.15 * s, -2 * BEND * s).normalize().multiplyScalar(side);
-  const end = new THREE.Vector3(side * (REEL.X + packR), REEL.Y, REEL.Z);
+  const end = reelHub(side).add(new THREE.Vector3(side * packR, 0, 0));
   return new THREE.CubicBezierCurve3(
     start,
-    start.clone().addScaledVector(out, 0.75),
-    end.clone().add(new THREE.Vector3(0, -0.8, 0)),     // arrives travelling straight up: tangent to the pack
+    start.clone().addScaledVector(out, 1.5),            // keeps running along the strip before it lifts
+    end.clone().add(new THREE.Vector3(0, -1.15, 0)),    // arrives travelling straight up: tangent to the pack
     end,
   );
 }
@@ -101,9 +106,9 @@ export function buildFilm(stage, lang) {
     for (let i = 0; i <= RIBBON_SEGMENTS; i++) {
       const k = i / RIBBON_SEGMENTS, p = curve.getPoint(k), tan = curve.getTangent(k);
       length += p.distanceTo(prev); prev = p;
-      const w = startUp.clone().lerp(endUp, THREE.MathUtils.smootherstep(k, 0.05, 0.6));
+      const w = startUp.clone().lerp(endUp, THREE.MathUtils.smootherstep(k, 0.2, 0.85));   // a slow, even twist
       w.addScaledVector(tan, -w.dot(tan)).normalize();
-      const half = THREE.MathUtils.lerp(FH * 0.46, REEL.DEPTH * 0.45, THREE.MathUtils.smoothstep(k, 0.05, 0.55));
+      const half = THREE.MathUtils.lerp(FH * 0.46, REEL.DEPTH * 0.45, THREE.MathUtils.smootherstep(k, 0.0, 0.38));   // narrows while still flat, then lifts
       pos.setXYZ(i * 2, p.x + w.x * half, p.y + w.y * half, p.z + w.z * half);
       pos.setXYZ(i * 2 + 1, p.x - w.x * half, p.y - w.y * half, p.z - w.z * half);
       uv.setXY(i * 2, length / P, 1); uv.setXY(i * 2 + 1, length / P, 0);

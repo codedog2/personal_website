@@ -9,7 +9,8 @@ import { CONFIG } from '../config.js';
 import { SECTIONS } from '../core/content.js';
 import { t } from '../core/i18n.js';
 import { canvasTex, grungeTex, woodTex, windowTex, drawDial, ensureFonts, agedBrassMaps, flangeAlpha, filmPackFaceTex } from './textures.js';
-import { filmPose } from './film.js';
+import { filmPose, reelHub } from './film.js';
+import { clockText } from './clock.js';
 
 const V = (a) => new THREE.Vector3(...a);
 const UP = new THREE.Vector3(0, 1, 0);
@@ -50,7 +51,7 @@ export function buildMachine(stage, models, lang) {
 
   // ---- articulated column behind the screen, a boom over it, and a cross beam for the reels
   const { COLUMN: [cx, cz], BOOM_Y, BEAM_Z } = CONFIG.RIG;
-  const { X: RX, Y: RY, Z: RZ, R: RR, DEPTH: RD } = CONFIG.REEL;
+  const { X: RX, Z: RZ, R: RR, DEPTH: RD } = CONFIG.REEL;
   const SCREEN_Z = CONFIG.SCREEN.REST[2];
   mesh(new THREE.CylinderGeometry(0.34, 0.4, 0.08, 48), M.iron, [cx, 0.04, cz]);
   mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.015, 48), M.brass, [cx, 0.085, cz]);
@@ -79,7 +80,8 @@ export function buildMachine(stage, models, lang) {
   const steel = new THREE.MeshStandardMaterial({ color: 0xb8b4ac, metalness: 1, roughness: 0.28, roughnessMap: grunge });
   const packMin = RR * 0.3, packMax = RR * 0.9;
   function reel(side) {
-    const g = group([side * RX, RY, RZ]);
+    const hub = reelHub(side), RY = hub.y;
+    const g = group([hub.x, hub.y, hub.z]);
     // hanger: rod from the cross beam down to a clamp on the axle behind the reel
     const backZ = BEAM_Z - RZ;
     mesh(new THREE.CylinderGeometry(0.018, 0.018, BOOM_Y - RY, 12), M.brass, [0, (BOOM_Y - RY) / 2, backZ], g);
@@ -157,6 +159,9 @@ export function buildMachine(stage, models, lang) {
     g.textAlign = 'left'; g.fillStyle = '#5a3a1a'; g.font = '500 26px "IBM Plex Mono"';
     g.fillText('OPTICAL ARCHIVE · READER OR-3', 70, 90);
     g.fillText(`FRAME ${String(index + 1).padStart(2, '0')} / ${String(SECTIONS.length).padStart(2, '0')}`, 70, 128);
+    const now = clockText();                              // visitor's local time, top right
+    g.textAlign = 'right'; g.font = '500 44px "IBM Plex Mono"'; g.fillText(now.time, w - 70, 96);
+    g.font = '500 22px "IBM Plex Mono"'; g.fillText(now.date, w - 70, 128); g.textAlign = 'left';
     g.fillStyle = '#2d2117'; g.font = `600 ${l === 'en' ? 150 : 120}px ${serif}`; g.fillText(t(`section.${id}.title`, l), 64, 360);
     g.fillStyle = '#6a4a2a'; g.font = `${l === 'en' ? 'italic ' : ''}500 46px ${serif}`; g.fillText(t(`section.${id}.tagline`, l), 70, 430);
     g.fillStyle = '#7a4a22'; g.font = `500 26px "IBM Plex Mono", ${serif}`; g.fillText(t('ui.screen.load', l), 70, 580);
@@ -202,7 +207,7 @@ export function buildMachine(stage, models, lang) {
   const FILM_C = V(CONFIG.FILM_CENTER);
   const [lx, ly, lz] = CONFIG.LAMP;
   const lamp = models.lamp;
-  lamp.position.set(lx, ly, lz); lamp.rotation.y = Math.atan2(FILM_C.x - lx, FILM_C.z - lz) + Math.PI; lamp.scale.setScalar(3.7);
+  lamp.position.set(lx, ly, lz); lamp.rotation.y = Math.atan2(FILM_C.x - lx, FILM_C.z - lz) + Math.PI; lamp.scale.setScalar(4.6);
   scene.add(lamp); lamp.updateMatrixWorld(true);
   let lampHead = new THREE.Vector3(lx - 1, 3.2, lz + 1);
   lamp.traverse(o => {

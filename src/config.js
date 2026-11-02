@@ -30,11 +30,11 @@ export const CONFIG = Object.freeze({
   TILT: -0.62,              // strip leans back at the reading gate
   LEAD: 5,                  // leader frames on each side
   STRIP_END: 2.4,           // the strip is clipped here and continues as a ribbon up to the reels
-  REEL: Object.freeze({ X: 2.35, Y: 1.75, Z: -1.2, R: 0.55, DEPTH: 0.16 }),    // hung from the cross beam by thin rods
+  REEL: Object.freeze({ X: 2.35, Y: [2.1, 1.38], Z: -1.2, R: 0.55, DEPTH: 0.16 }),   // [left, right] heights differ on purpose; hung on rods
   SCREEN: Object.freeze({ REST: [0, 2.2, -1.05], BEZEL: [2.62, 1.82], GLASS: [2.3, 1.5], SLIDE: 0.9 }),
   RIG: Object.freeze({ COLUMN: [0, -1.85], BOOM_Y: 3.42, BEAM_Z: -1.45 }),   // column foot (x, z); boom height; cross beam depth
   CONSOLE: Object.freeze({ POS: [0, 1.0, 0.15], SIZE: [1.15, 0.36], KNOB_X: 0.3 }),
-  LAMP: [3.45, 0, -1.9],
+  LAMP: [4.05, 0, -2.6],   // behind and above the right reel
 });
 
 /** Normalise a deploy path (e.g. "portfolio") into Vite's `base` form ("/portfolio/"). */

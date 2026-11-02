@@ -14,11 +14,9 @@
   border: 1px solid #6a5434; border-radius: 6px; padding: 6px 10px; cursor: pointer; }
 .oa3d .chip:hover, .oa3d .chip.on { color: var(--amber); border-color: var(--amber); }
 
-.oa3d .counter { position: fixed; left: 50%; top: 28px; transform: translateX(-50%); font-family: var(--mono); font-size: 13px; letter-spacing: 3px;
-  color: var(--amber); text-shadow: 0 0 10px rgba(255,170,80,.6); transition: opacity .5s; white-space: nowrap; }
 .oa3d .hint { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px;
   color: var(--dim); white-space: nowrap; transition: opacity .5s; pointer-events: none; }
-.oa3d.zoomed .brand, .oa3d.zoomed .counter, .oa3d.zoomed .hint { opacity: 0; }
+.oa3d.zoomed .brand, .oa3d.zoomed .hint { opacity: 0; }
 
 /* HTML content glued onto the 3D glass */
 .oa3d .reader:focus { outline: none; }
