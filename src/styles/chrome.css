@@ -22,24 +22,25 @@
 
 /* HTML content glued onto the 3D glass */
 .oa3d .reader:focus { outline: none; }
-.oa3d .reader { position: fixed; display: none; border-radius: 6px; overflow: hidden; box-shadow: inset 0 0 60px rgba(90,55,20,.45); }
+.oa3d .reader { container-type: inline-size; position: fixed; display: none; border-radius: 6px; overflow: hidden; box-shadow: inset 0 0 60px rgba(90,55,20,.45); }
 .oa3d .reader.show { display: block; animation: poweron .55s steps(1) both; }
 .oa3d .reader.flash { animation: poweron .45s steps(1) both; }
 .oa3d .reader > .paper { --u: max(1cqw, 9px); position: absolute; inset: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #a08560 transparent; }
+.oa3d .reader > .paper > .section { padding-bottom: calc(7 * var(--u)); }   /* room for the BACK token */
 @keyframes poweron { 0% { opacity: 0 } 12% { opacity: .9 } 20% { opacity: .15 } 34% { opacity: 1 } 44% { opacity: .55 } 56%, 100% { opacity: 1 } }
 
-/* return token: same family as the skill boxes, but dark-filled with a keycap */
-.oa3d .exit { position: fixed; left: 50%; bottom: max(8px, 1.6vh); transform: translateX(-50%); display: none; z-index: 5; cursor: pointer;
-  font-family: var(--mono); font-size: 12px; letter-spacing: 1.5px; color: #ffcf95; background: rgba(24,16,9,.9);
-  border: 1.5px solid var(--token); border-radius: 9px; padding: 4px 5px 4px 11px;
-  box-shadow: 0 0 9px rgba(255,150,50,.45), inset 0 0 6px rgba(255,150,50,.2); text-shadow: 0 0 6px rgba(255,179,92,.5); transition: background .15s, color .15s; }
-.oa3d .exit:hover, .oa3d .exit:focus-visible { background: var(--token); color: #fff6e6; text-shadow: none; outline: none; }
-.oa3d .exit kbd { font: inherit; font-size: 10px; letter-spacing: 1px; margin-left: 8px; padding: 1px 6px; border-radius: 5px;
-  background: #ffcf95; color: #2a1408; box-shadow: 0 2px 0 #8a5a22; text-shadow: none; }
-.oa3d.zoomed .exit { display: block; animation: exitIn .4s ease-out .2s both, exitPulse 1.8s ease-in-out .7s 2; }
-@keyframes exitIn { from { opacity: 0; transform: translate(-50%, 8px); } }
-@keyframes exitPulse { 50% { box-shadow: 0 0 20px rgba(255,150,50,.85), inset 0 0 8px rgba(255,150,50,.35); } }
+/* BACK: a small token in the bottom-right corner of the paper, same family as the skill boxes, with a keycap */
+.oa3d .reader .back { position: absolute; right: calc(1.6 * var(--u, 1cqw)); bottom: calc(1.4 * var(--u, 1cqw)); z-index: 4; cursor: pointer;
+  --u: max(1cqw, 9px);
+  font-family: var(--mono); font-size: calc(1.2 * var(--u)); letter-spacing: .12em; color: #5a2a0c;
+  background: rgba(255,160,60,.14); border: 1.5px solid var(--token); border-radius: calc(.8 * var(--u)); padding: .3em .35em .3em .8em;
+  box-shadow: 0 0 .8em rgba(255,150,50,.4), inset 0 0 .5em rgba(255,150,50,.2); transition: background .15s, color .15s; }
+.oa3d .reader .back:hover, .oa3d .reader .back:focus-visible { background: var(--token); color: #fff6e6; outline: none; }
+.oa3d .reader .back kbd { font: inherit; font-size: .8em; letter-spacing: .05em; margin-left: .6em; padding: .05em .45em; border-radius: .35em;
+  background: #2d2117; color: #f3e6c8; box-shadow: 0 .15em 0 #000; }
+.oa3d .reader.show .back { animation: backIn .5s ease-out .5s both; }
+@keyframes backIn { from { opacity: 0; transform: translateY(.4em); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .oa3d .reader.show, .oa3d .reader.flash, .oa3d.zoomed .exit { animation: none; }
+  .oa3d .reader.show, .oa3d .reader.flash, .oa3d .reader.show .back { animation: none; }
 }

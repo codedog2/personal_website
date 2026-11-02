@@ -44,6 +44,7 @@ export function createStage(canvas, { lowPower = false, calm = false } = {}) {
   renderer.toneMappingExposure = 1.05;
   renderer.shadowMap.enabled = !lowPower;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.localClippingEnabled = true;     // film frames are clipped where the strip becomes a ribbon
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0a0705);

@@ -127,8 +127,63 @@ export function drawFrame(canvas, kind, label, font) {
   g.restore();
 }
 
-/** Dial face: tick ring plus labels at given angles (radians, 0 = 12 o'clock, clockwise). */
-export function drawDial(canvas, labels) {
+/** Aged brass for the reel flanges: colour with worn highlights and dark patina, lathe-ring bump, uneven roughness. */
+export function agedBrassMaps() {
+  const S = 512, c = S / 2;
+  const map = canvasTex(S, S, g => {
+    const base = g.createRadialGradient(c * 0.8, c * 0.7, 10, c, c, c);
+    base.addColorStop(0, '#d8ab68'); base.addColorStop(0.6, '#b4864a'); base.addColorStop(1, '#8a6232');
+    g.fillStyle = base; g.fillRect(0, 0, S, S);
+    for (let i = 0; i < 900; i++) {                 // patina blotches and worn bright spots
+      const dark = Math.random() < 0.6;
+      g.fillStyle = dark ? `rgba(${rnd(40, 70) | 0},${rnd(48, 66) | 0},${rnd(28, 40) | 0},${rnd(0.04, 0.12)})` : `rgba(255,226,170,${rnd(0.03, 0.09)})`;
+      g.beginPath(); g.arc(rnd(0, S), rnd(0, S), rnd(2, 22), 0, 7); g.fill();
+    }
+    for (let r = 8; r < c; r += rnd(2, 5)) { g.strokeStyle = `rgba(${Math.random() < 0.5 ? '255,230,180' : '60,40,15'},${rnd(0.02, 0.06)})`; g.lineWidth = 1; g.beginPath(); g.arc(c, c, r, 0, 7); g.stroke(); }
+  });
+  const bump = canvasTex(S, S, g => {
+    g.fillStyle = '#808080'; g.fillRect(0, 0, S, S);
+    for (let r = 4; r < c; r += rnd(1.5, 3.5)) { const v = rnd(100, 160) | 0; g.strokeStyle = `rgb(${v},${v},${v})`; g.lineWidth = rnd(0.6, 1.6); g.beginPath(); g.arc(c, c, r, 0, 7); g.stroke(); }
+    for (let i = 0; i < 90; i++) { g.strokeStyle = `rgba(30,30,30,${rnd(0.2, 0.5)})`; g.lineWidth = rnd(0.4, 1.2); const x = rnd(0, S), y = rnd(0, S); g.beginPath(); g.moveTo(x, y); g.lineTo(x + rnd(-40, 40), y + rnd(-40, 40)); g.stroke(); }
+  }, { srgb: false });
+  const rough = canvasTex(S, S, g => {
+    g.fillStyle = '#6e6e6e'; g.fillRect(0, 0, S, S);
+    for (let i = 0; i < 700; i++) { const v = rnd(70, 200) | 0; g.fillStyle = `rgba(${v},${v},${v},0.18)`; g.beginPath(); g.arc(rnd(0, S), rnd(0, S), rnd(3, 26), 0, 7); g.fill(); }
+  }, { srgb: false });
+  return { map, bump, rough };
+}
+
+/** Alpha mask for a reel flange: a disc with six rounded cut-outs and an axle hole. */
+export function flangeAlpha() {
+  return canvasTex(512, 512, (g, w) => {
+    const c = w / 2;
+    g.fillStyle = '#000'; g.fillRect(0, 0, w, w);
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(c, c, c - 1, 0, 7); g.fill();
+    g.fillStyle = '#000';
+    for (let i = 0; i < 6; i++) {
+      const a = i / 6 * Math.PI * 2, a0 = a - 0.36, a1 = a + 0.36;
+      g.beginPath(); g.arc(c, c, c * 0.84, a0, a1); g.arc(c, c, c * 0.34, a1, a0, true); g.closePath(); g.fill();
+    }
+    g.beginPath(); g.arc(c, c, c * 0.05, 0, 7); g.fill();
+  }, { srgb: false });
+}
+
+/** Side of a wound film pack: fine concentric layers with an amber sheen. */
+export function filmPackFaceTex() {
+  return canvasTex(512, 512, (g, w) => {
+    const c = w / 2;
+    g.fillStyle = '#1b120a'; g.fillRect(0, 0, w, w);
+    for (let r = c * 0.2; r < c; r += rnd(0.8, 2.2)) {
+      g.strokeStyle = `rgba(${rnd(90, 150) | 0},${rnd(55, 90) | 0},${rnd(25, 45) | 0},${rnd(0.25, 0.6)})`; g.lineWidth = rnd(0.5, 1.2);
+      g.beginPath(); g.arc(c, c, r, 0, 7); g.stroke();
+    }
+    const sheen = g.createLinearGradient(0, 0, w, w); sheen.addColorStop(0.35, 'rgba(255,200,140,0)'); sheen.addColorStop(0.5, 'rgba(255,200,140,.18)'); sheen.addColorStop(0.65, 'rgba(255,200,140,0)');
+    g.fillStyle = sheen; g.fillRect(0, 0, w, w);
+  });
+}
+
+/** Dial face: tick ring plus labels at given angles (radians, 0 = 12 o'clock, clockwise). labelR: label radius as a share of the dial radius. */
+export function drawDial(canvas, labels, labelR = 0.6) {
   const g = canvas.getContext('2d'), s = canvas.width, c = s / 2;
   g.clearRect(0, 0, s, s);
   g.fillStyle = '#20170e'; g.beginPath(); g.arc(c, c, c - 4, 0, 7); g.fill();
@@ -140,6 +195,6 @@ export function drawDial(canvas, labels) {
   g.fillStyle = '#ecd3a0'; g.textAlign = 'center'; g.textBaseline = 'middle';
   for (const { text, angle, size = 40 } of labels) {
     g.save(); g.translate(c, c); g.rotate(angle); g.font = `500 ${size}px "IBM Plex Mono", "Noto Serif SC", "Noto Serif JP"`;
-    g.fillText(text, 0, -0.6 * c); g.restore();
+    g.fillText(text, 0, -labelR * c); g.restore();
   }
 }

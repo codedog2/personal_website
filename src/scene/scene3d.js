@@ -57,8 +57,9 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
   const reader = el('div', { class: 'reader', role: 'dialog', 'aria-modal': 'true', tabindex: -1 }, el('div', { class: 'paper' }, readerBody));
   const exitKey = el('kbd', {}, 'ESC');
   const exitLabel = el('span');
-  const exit = el('button', { type: 'button', class: 'exit', onclick: () => unload() }, exitLabel, exitKey);
-  const shell = el('div', { class: 'oa3d' }, brand, counter, hint, el('div', { class: 'topright' }, soundBtn, simpleBtn), reader, exit);
+  const exit = el('button', { type: 'button', class: 'back', onclick: () => unload() }, exitLabel, exitKey);
+  reader.append(exit);                                   // BACK sits in the corner of the paper, outside the scrolling area
+  const shell = el('div', { class: 'oa3d' }, brand, counter, hint, el('div', { class: 'topright' }, soundBtn, simpleBtn), reader);
   root.replaceChildren(shell);
   canvas.classList.add('active');
 
@@ -110,11 +111,13 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
   function pickAt(e) {
     ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
     ray.setFromCamera(ndc, camera);
-    const hit = ray.intersectObjects([...film.meshes, machine.loadKnob.group, machine.langKnob.group, machine.screen.glass], true)[0]?.object;
+    const hits = ray.intersectObjects([...film.meshes, machine.loadKnob.group, machine.langKnob.group, machine.screen.glass], true)
+      .filter(h => h.object.visible && (!film.meshes.includes(h.object) || Math.abs(h.point.x) <= CONFIG.STRIP_END));
+    const first = hits[0], hit = first?.object;
     if (!hit) return null;
     if (isIn(hit, machine.loadKnob.group) || hit === machine.screen.glass) return { kind: 'load' };
     if (isIn(hit, machine.langKnob.group)) return { kind: 'lang' };
-    const ci = film.frameAt(hit);
+    const ci = film.frameAt(first);
     return ci === null ? null : { kind: 'frame', index: ci };
   }
   const worldPerPx = () => 2 * camera.position.distanceTo(FILM_C) * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / innerHeight;
@@ -200,15 +203,15 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
   function frame(now, dt) {
     const time = now / 1000;
     if (canBrowse(state) && !drag) stepFilm(physics, dt);
-    film.update(physics.offset);
+    const prog = physics.max ? THREE.MathUtils.clamp(physics.offset / physics.max, 0, 1) : 0;
+    const packs = [machine.rewinds.left.setFill(1 - prog), machine.rewinds.right.setFill(prog)];
+    film.update(physics.offset, packs);
     const idx = filmIndex(physics);
     if (idx !== lastIdx) {
       if (lastIdx !== -1) sound.tick();
       lastIdx = idx; machine.screen.drawIdle(idx, lang); paintCounter();
     }
-    const prog = physics.max ? THREE.MathUtils.clamp(physics.offset / physics.max, 0, 1) : 0;
-    machine.rewinds.left.setSpin(-physics.offset / CONFIG.REEL.R); machine.rewinds.right.setSpin(-physics.offset / CONFIG.REEL.R);
-    machine.rewinds.left.setFill(1 - prog); machine.rewinds.right.setFill(prog);
+    machine.rewinds.left.setSpin(physics.offset / packs[0]); machine.rewinds.right.setSpin(physics.offset / packs[1]);
     machine.setGateGlow(state === READER.IDLE && isSettled(physics) ? 3.2 + Math.sin(time * 3) * 0.6 : 1.4);
 
     if (state === READER.LOADING) {

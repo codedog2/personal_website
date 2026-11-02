@@ -27,13 +27,6 @@ export function retint(root, { tint, amount = 0.8, metal = null }) {
 export async function loadModels(base) {
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const load = name => loader.loadAsync(`${base}models/${name}.glb`).then(g => g.scene);
-  const [reel, tv, lamp] = await Promise.all([load('reel'), load('tv'), load('lamp')]);
-
-  retint(reel, { tint: 0xb68a52, amount: 0.85, metal: 0.85 });
-  retint(tv, { tint: 0x6a5238, amount: 0.75, metal: 0.6 });
-  retint(lamp, { tint: 0xb48a50, amount: 0.8, metal: 0.9 });
-
-  const spool = reel.getObjectByName('spool'), woundFilm = reel.getObjectByName('woundFilm');
-  if (!spool || !woundFilm) throw new Error('reel.glb is missing the spool/woundFilm nodes');
-  return { spool, woundFilm, tv, lamp };
+  const lamp = retint(await load('lamp'), { tint: 0xb48a50, amount: 0.8, metal: 0.9 });
+  return { lamp };
 }

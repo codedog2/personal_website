@@ -1,12 +1,14 @@
-// The reader bench: one machine on a wooden worktable. Two rewind reels feed the strip through a lit
-// reading gate; behind it the reading screen; a free-standing LOAD knob on the right, a language knob
-// on the left; a desk lamp lights the gate. (Spec §4.3 — no projector body, lens, panel box or lever.)
+// The reader bench: one machine on a wooden worktable. An articulated column behind the screen carries
+// a boom: the screen hangs from it on a sliding yoke, and two reels hang from its cross beam on thin
+// rods. The film strip lies across the bench through a lit reading gate and ribbons up to the reels.
+// A small control panel, parallel to the screen, holds the language and VIEW/LOAD knobs; a desk lamp
+// lights the gate. (No projector body, lens, housing box or lever.)
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { CONFIG } from '../config.js';
 import { SECTIONS } from '../core/content.js';
 import { t } from '../core/i18n.js';
-import { canvasTex, grungeTex, woodTex, windowTex, drawDial, ensureFonts } from './textures.js';
+import { canvasTex, grungeTex, woodTex, windowTex, drawDial, ensureFonts, agedBrassMaps, flangeAlpha, filmPackFaceTex } from './textures.js';
 import { filmPose } from './film.js';
 
 const V = (a) => new THREE.Vector3(...a);
@@ -46,33 +48,65 @@ export function buildMachine(stage, models, lang) {
     mesh(new THREE.TorusGeometry(0.61 - i * 0.03, 0.012, 6, 48).rotateX(Math.PI / 2), M.brass, [0, 0.1, 0], tin);
   }
 
-  // ---- rewinds: reel bottoms meet the film line at x = ±REEL.X
-  const { X: RX, R: RR } = CONFIG.REEL, spoolScale = RR / 0.089;
-  function rewind(x, withCrank) {
-    const g = group([x, 0.36, 0.53]);
-    const hubY = CONFIG.FILM_CENTER[1] + 0.06 - 0.36 + RR;
-    mesh(new RoundedBoxGeometry(0.55, 0.12, 0.7, 2, 0.03), M.iron, [0, 0.06, -0.2], g);
-    mesh(new THREE.CylinderGeometry(0.06, 0.08, hubY, 20), M.ironMid, [0, hubY / 2, -0.32], g);
-    mesh(new RoundedBoxGeometry(0.3, 0.3, 0.22, 3, 0.05), M.iron, [0, hubY, -0.3], g);
-    mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.6, 12).rotateX(Math.PI / 2), M.brass, [0, hubY, -0.05], g);
-    const hub = group([0, hubY, 0], g);
-    const turn = new THREE.Group(); turn.rotation.y = Math.PI / 2; hub.add(turn);   // spool axis (local x) → world z
-    // wrap the model nodes: meshopt quantization keeps its own scale/offset on them, which must not be overwritten
-    const wrap = obj => { const w = new THREE.Group(); w.add(obj.clone()); w.scale.setScalar(spoolScale); turn.add(w); return w; };
-    const spool = wrap(models.spool), film = wrap(models.woundFilm);
-    let crank = null;
-    if (withCrank) {
-      crank = group([0, 0, 0.24], hub);
-      mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.06, 20).rotateX(Math.PI / 2), M.brass, [0, 0, 0], crank);
-      mesh(new THREE.BoxGeometry(0.06, 0.5, 0.04), M.brass, [0, 0.25, 0.02], crank);
-      mesh(new THREE.CylinderGeometry(0.05, 0.055, 0.22, 20).rotateX(Math.PI / 2), M.wood, [0, 0.48, 0.13], crank);
+  // ---- articulated column behind the screen, a boom over it, and a cross beam for the reels
+  const { COLUMN: [cx, cz], BOOM_Y, BEAM_Z } = CONFIG.RIG;
+  const { X: RX, Y: RY, Z: RZ, R: RR, DEPTH: RD } = CONFIG.REEL;
+  const SCREEN_Z = CONFIG.SCREEN.REST[2];
+  mesh(new THREE.CylinderGeometry(0.34, 0.4, 0.08, 48), M.iron, [cx, 0.04, cz]);
+  mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.015, 48), M.brass, [cx, 0.085, cz]);
+  const elbow = new THREE.Vector3(cx, 2.35, cz - 0.28), top = new THREE.Vector3(cx, BOOM_Y + 0.1, cz);
+  rod(new THREE.Vector3(cx, 0.08, cz), elbow, 0.075, M.ironMid);
+  rod(elbow, top, 0.065, M.ironMid);
+  for (const [p, r] of [[elbow, 0.12], [top, 0.11]]) {
+    mesh(new THREE.CylinderGeometry(r, r, 0.22, 32).rotateZ(Math.PI / 2), M.brass, [p.x, p.y, p.z]);
+    mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.3, 12).rotateZ(Math.PI / 2), M.ironMid, [p.x, p.y, p.z]);
+  }
+  // boom: a rail running forward over the screen; the screen's yoke slides along it
+  rod(top, new THREE.Vector3(cx, BOOM_Y + 0.1, SCREEN_Z + CONFIG.SCREEN.SLIDE + 0.15), 0.045, M.brassDark);
+  // cross beam the reels hang from
+  rod(new THREE.Vector3(-RX - 0.1, BOOM_Y, BEAM_Z), new THREE.Vector3(RX + 0.1, BOOM_Y, BEAM_Z), 0.04, M.ironMid);
+  mesh(new THREE.BoxGeometry(0.16, 0.16, Math.abs(BEAM_Z - cz) + 0.12), M.iron, [cx, BOOM_Y, (BEAM_Z + cz) / 2]);
+  for (const x of [-RX, RX]) mesh(new THREE.SphereGeometry(0.06, 16, 12), M.brass, [x, BOOM_Y, BEAM_Z]);
+
+  // ---- reels: aged brass flanges with cut-outs, glossy wound film, steel hub; each hangs on a thin rod
+  const brassTex = agedBrassMaps(), cutouts = flangeAlpha(), packFace = filmPackFaceTex();
+  const flangeMat = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff, map: brassTex.map, bumpMap: brassTex.bump, bumpScale: 1.2, roughnessMap: brassTex.rough, roughness: 0.85,
+    metalness: 1, clearcoat: 0.15, clearcoatRoughness: 0.4, alphaMap: cutouts, alphaTest: 0.5, side: THREE.DoubleSide,
+  });
+  const packSideMat = new THREE.MeshPhysicalMaterial({ color: 0x2a190c, roughness: 0.22, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.08, sheen: 0.4, sheenColor: 0x8a5a2a });
+  const packFaceMat = new THREE.MeshPhysicalMaterial({ map: packFace, roughness: 0.3, clearcoat: 0.8, clearcoatRoughness: 0.15 });
+  const steel = new THREE.MeshStandardMaterial({ color: 0xb8b4ac, metalness: 1, roughness: 0.28, roughnessMap: grunge });
+  const packMin = RR * 0.3, packMax = RR * 0.9;
+  function reel(side) {
+    const g = group([side * RX, RY, RZ]);
+    // hanger: rod from the cross beam down to a clamp on the axle behind the reel
+    const backZ = BEAM_Z - RZ;
+    mesh(new THREE.CylinderGeometry(0.018, 0.018, BOOM_Y - RY, 12), M.brass, [0, (BOOM_Y - RY) / 2, backZ], g);
+    mesh(new THREE.CylinderGeometry(0.035, 0.035, Math.abs(backZ) + RD / 2 + 0.06, 16).rotateX(Math.PI / 2), steel, [0, 0, backZ / 2 - 0.02], g);
+    mesh(new RoundedBoxGeometry(0.1, 0.12, 0.08, 2, 0.02), M.iron, [0, 0, backZ], g);
+    const spin = new THREE.Group(); g.add(spin);
+    for (const z of [-RD / 2, RD / 2]) {
+      mesh(new THREE.CircleGeometry(RR, 96), flangeMat, [0, 0, z], spin);
+      mesh(new THREE.TorusGeometry(RR - 0.006, 0.014, 10, 96), M.brass, [0, 0, z], spin);
     }
+    const pack = new THREE.Group(); spin.add(pack);
+    mesh(new THREE.CylinderGeometry(1, 1, RD * 0.88, 96, 1, true).rotateX(Math.PI / 2), packSideMat, [0, 0, 0], pack);
+    for (const z of [-RD * 0.44, RD * 0.44]) mesh(new THREE.CircleGeometry(1, 96), packFaceMat, [0, 0, z], pack);
+    mesh(new THREE.CylinderGeometry(RR * 0.2, RR * 0.2, RD * 1.05, 40).rotateX(Math.PI / 2), M.brass, [0, 0, 0], spin);
+    mesh(new THREE.CylinderGeometry(0.04, 0.04, RD * 1.3, 20).rotateX(Math.PI / 2), steel, [0, 0, 0], spin);
+    for (let k = 0; k < 3; k++) {                       // set screws on the hub collar
+      const a = k / 3 * Math.PI * 2;
+      mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.012, 10).rotateX(Math.PI / 2), steel, [Math.cos(a) * RR * 0.14, Math.sin(a) * RR * 0.14, RD * 0.53], spin);
+    }
+    let radius = packMax;
     return {
-      setSpin(angle) { spool.rotation.x = film.rotation.x = angle; if (crank) crank.rotation.z = angle; },
-      setFill(f) { const k = (0.55 + 0.45 * f) * spoolScale; film.scale.set(spoolScale, k, k); },
+      setSpin(angle) { spin.rotation.z = angle; },
+      /** f = 0..1 share of the film on this reel; returns the film pack radius. */
+      setFill(f) { radius = THREE.MathUtils.lerp(packMin, packMax, f); pack.scale.set(radius, radius, 1); return radius; },
     };
   }
-  const rewinds = { left: rewind(-RX, false), right: rewind(RX, true) };
+  const rewinds = { left: reel(-1), right: reel(1) };
 
   // ---- reading gate: light box below, brass frame with a glowing inner edge
   const gate = new THREE.Group(); filmPose(0, gate); scene.add(gate);
@@ -82,18 +116,23 @@ export function buildMachine(stage, models, lang) {
   for (const [x, y, w, h] of [[0, gh / 2 - 0.022, gw - 0.02, 0.008], [0, -gh / 2 + 0.022, gw - 0.02, 0.008], [gw / 2 - 0.022, 0, 0.008, gh - 0.03], [-gw / 2 + 0.022, 0, 0.008, gh - 0.03]]) {
     mesh(new THREE.PlaneGeometry(w, h), M.glow, [x, y, 0.047], gate).castShadow = false;
   }
-  rod(new THREE.Vector3(-RX, 0.16, 1.32), new THREE.Vector3(RX, 0.16, 1.32), 0.035, M.brass);
+  rod(new THREE.Vector3(-CONFIG.STRIP_END, 0.16, 1.32), new THREE.Vector3(CONFIG.STRIP_END, 0.16, 1.32), 0.035, M.brass);
   const ruler = canvasTex(2048, 64, (g, w) => {
     g.fillStyle = '#2a2016'; g.fillRect(0, 0, w, 64); g.strokeStyle = '#c8a46a';
     for (let x = 0; x < w; x += 16) { const big = (x / 16) % 10 === 0; g.lineWidth = big ? 3 : 1.5; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, big ? 40 : 20); g.stroke(); }
   });
-  mesh(new THREE.PlaneGeometry(2 * RX, 0.22).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ map: ruler, metalness: 0.6, roughness: 0.5 }), [0, 0.012, 1.55]);
+  mesh(new THREE.PlaneGeometry(2 * CONFIG.STRIP_END, 0.22).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ map: ruler, metalness: 0.6, roughness: 0.5 }), [0, 0.012, 1.55]);
   mesh(new THREE.ConeGeometry(0.07, 0.12, 3).rotateX(-Math.PI / 2), M.brass, [0, 0.06, 1.6]);
 
-  // ---- reading screen: TV body as housing, brass bezel, glowing glass (slides forward on load)
+  // ---- reading screen: brass bezel, back plate and glowing glass, hung from a yoke that slides along the boom
   const { REST, BEZEL: [BW, BH], GLASS: [GW, GH] } = CONFIG.SCREEN;
   const rig = group(REST);
-  models.tv.scale.setScalar(7.2); models.tv.position.set(0, -1.6, -0.84); rig.add(models.tv);
+  mesh(new RoundedBoxGeometry(BW + 0.04, BH + 0.04, 0.12, 4, 0.05), M.iron, [0, 0, -0.02], rig);
+  const yokeY = BOOM_Y - REST[1] - 0.16, railY = BOOM_Y + 0.1 - REST[1];
+  for (const x of [-0.85, 0.85]) mesh(new THREE.CylinderGeometry(0.022, 0.022, yokeY - BH / 2, 12), M.brass, [x, (yokeY + BH / 2) / 2, -0.02], rig);
+  mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.9, 16).rotateZ(Math.PI / 2), M.brassDark, [0, yokeY, -0.02], rig);
+  mesh(new THREE.CylinderGeometry(0.03, 0.03, railY - yokeY, 12), M.ironMid, [0, (yokeY + railY) / 2, -0.02], rig);
+  mesh(new RoundedBoxGeometry(0.2, 0.12, 0.2, 2, 0.03), M.iron, [0, railY, -0.02], rig);   // carriage riding the rail
   const bezel = mesh(new RoundedBoxGeometry(BW, BH, 0.12, 4, 0.06), M.brass, [0, 0, 0.1], rig);
   mesh(new RoundedBoxGeometry(GW + 0.08, GH + 0.08, 0.05, 2, 0.02), M.iron, [0, 0, 0.15], rig);
   for (const [x, y] of [[-1.22, 0.82], [1.22, 0.82], [-1.22, -0.82], [1.22, -0.82]]) mesh(new THREE.SphereGeometry(0.035, 12, 8), M.brass, [x, y, 0.17], rig);
@@ -125,33 +164,39 @@ export function buildMachine(stage, models, lang) {
   }
   drawIdle(0, lang);
 
-  // ---- knobs: free-standing (iron base, stem, iron cup, engraved dial, knurled brass knob)
-  function knobStand(pos, scale, labels) {
-    const [x, y, z] = pos;
-    const s = scale;
-    mesh(new THREE.CylinderGeometry(0.28 * s, 0.32 * s, 0.07, 48), M.iron, [x, 0.395, z - 0.19]);
-    mesh(new THREE.CylinderGeometry(0.3 * s, 0.3 * s, 0.015, 48), M.brass, [x, 0.435, z - 0.19]);
-    mesh(new THREE.CylinderGeometry(0.045, 0.06, y - 0.38, 20), M.ironMid, [x, (y + 0.43) / 2, z - 0.19]);
-    const mount = group(pos); mount.rotation.set(-0.18, -0.12 * Math.sign(x), 0); mount.scale.setScalar(s);
-    mesh(new THREE.CylinderGeometry(0.43, 0.45, 0.12, 64).rotateX(Math.PI / 2), M.iron, [0, 0, -0.11], mount);
-    mesh(new THREE.CylinderGeometry(0.4, 0.42, 0.05, 64).rotateX(Math.PI / 2), M.brassDark, [0, 0, -0.03], mount);
-    const dial = canvasTex(512, 512, c => drawDial(c.canvas, labels));
-    mesh(new THREE.CircleGeometry(0.38, 64), new THREE.MeshStandardMaterial({ map: dial, metalness: 0.4, roughness: 0.55 }), [0, 0, 0], mount);
-    const knob = new THREE.Group(); mount.add(knob);
-    mesh(new THREE.CylinderGeometry(0.21, 0.23, 0.17, 48).rotateX(Math.PI / 2), M.brass, [0, 0, 0.09], knob);
-    for (let i = 0; i < 28; i++) {
-      const a = i / 28 * Math.PI * 2;
-      mesh(new THREE.BoxGeometry(0.022, 0.03, 0.16), M.brassDark, [Math.cos(a) * 0.222, Math.sin(a) * 0.222, 0.09], knob).rotation.z = a;
+  // ---- control panel, parallel to the screen, facing the camera; two knobs with their labels on an outer ring
+  const { POS: [kx, ky, kz], SIZE: [KW, KH], KNOB_X } = CONFIG.CONSOLE;
+  const panel = group([kx, ky, kz]); panel.rotation.x = -0.12;
+  mesh(new RoundedBoxGeometry(KW, KH, 0.09, 3, 0.03), M.iron, [0, 0, 0], panel);
+  for (const [x, y, w, h] of [[0, KH / 2, KW, 0.02], [0, -KH / 2, KW, 0.02], [KW / 2, 0, 0.02, KH], [-KW / 2, 0, 0.02, KH]]) mesh(new THREE.BoxGeometry(w, h, 0.1), M.brass, [x, y, 0], panel);
+  for (const x of [-KW / 2 + 0.12, KW / 2 - 0.12]) mesh(new THREE.CylinderGeometry(0.025, 0.035, ky - KH / 2, 12), M.ironMid, [kx + x, (ky - KH / 2) / 2, kz - 0.02]);
+  const plate = canvasTex(256, 64, (g, w, h) => {
+    g.fillStyle = '#c4a067'; g.fillRect(0, 0, w, h); g.strokeStyle = '#5a3c18'; g.lineWidth = 4; g.strokeRect(4, 4, w - 8, h - 8);
+    g.fillStyle = '#3a240c'; g.font = '500 30px "IBM Plex Mono"'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('OR-3', w / 2, h / 2 + 2);
+  });
+  mesh(new THREE.PlaneGeometry(0.2, 0.05), new THREE.MeshStandardMaterial({ map: plate, metalness: 0.7, roughness: 0.45 }), [0, -KH / 2 + 0.05, 0.047], panel);
+  const DIAL_R = 0.15;
+  function knob(x, labels) {
+    const mount = group([x, 0.02, 0.046], panel);
+    const dial = canvasTex(512, 512, c => drawDial(c.canvas, labels, 0.76));
+    mesh(new THREE.CircleGeometry(DIAL_R, 64), new THREE.MeshStandardMaterial({ map: dial, metalness: 0.4, roughness: 0.55 }), [0, 0, 0.001], mount);
+    const ringMat = new THREE.MeshStandardMaterial({ color: 0x1a120a, emissive: 0xffa040, emissiveIntensity: 0 });
+    mesh(new THREE.RingGeometry(DIAL_R * 0.98, DIAL_R * 1.06, 64), ringMat, [0, 0, 0.002], mount);
+    const k = new THREE.Group(); mount.add(k);
+    mesh(new THREE.CylinderGeometry(0.068, 0.074, 0.07, 40).rotateX(Math.PI / 2), M.brass, [0, 0, 0.035], k);
+    for (let i = 0; i < 20; i++) {
+      const a = i / 20 * Math.PI * 2;
+      mesh(new THREE.BoxGeometry(0.009, 0.012, 0.064), M.brassDark, [Math.cos(a) * 0.072, Math.sin(a) * 0.072, 0.035], k).rotation.z = a;
     }
-    mesh(new THREE.CylinderGeometry(0.15, 0.18, 0.05, 48).rotateX(Math.PI / 2), M.ironMid, [0, 0, 0.19], knob);
-    mesh(new THREE.BoxGeometry(0.035, 0.15, 0.02), M.pointer, [0, 0.08, 0.22], knob);
-    return knob;
+    mesh(new THREE.CylinderGeometry(0.048, 0.056, 0.016, 40).rotateX(Math.PI / 2), M.ironMid, [0, 0, 0.076], k);
+    mesh(new THREE.BoxGeometry(0.012, 0.07, 0.008), M.pointer, [0, 0.04, 0.086], k);
+    return { k, ringMat };
   }
-  const load = knobStand(CONFIG.LOAD_KNOB, 1, [{ text: 'VIEW', angle: 0 }, { text: 'LOAD', angle: Math.PI / 2 }]);
+  const load = knob(KNOB_X, [{ text: 'VIEW', angle: 0 }, { text: 'LOAD', angle: Math.PI / 2 }]);
   const LANG_ANGLE = { en: -Math.PI / 4, zh: 0, ja: Math.PI / 4 };
-  const langKnob = knobStand(CONFIG.LANG_KNOB, 0.62, [{ text: 'EN', angle: -Math.PI / 4, size: 56 }, { text: '中', angle: 0, size: 64 }, { text: '日', angle: Math.PI / 4, size: 64 }]);
+  const langKnob = knob(-KNOB_X, [{ text: 'EN', angle: -Math.PI / 4, size: 52 }, { text: '中', angle: 0, size: 60 }, { text: '日', angle: Math.PI / 4, size: 60 }]);
   let langTarget = -LANG_ANGLE[lang];
-  langKnob.rotation.z = langTarget;
+  langKnob.k.rotation.z = langTarget;
 
   // ---- desk lamp lighting the gate
   const FILM_C = V(CONFIG.FILM_CENTER);
@@ -190,13 +235,19 @@ export function buildMachine(stage, models, lang) {
   return {
     rewinds,
     screen: { rig, glass, bezel, restPos: rig.position.clone(), drawIdle },
-    loadKnob: { group: load, setTurn(t01) { load.rotation.z = -t01 * Math.PI / 2; } },
-    langKnob: { group: langKnob, setLang(l) { langTarget = -LANG_ANGLE[l]; } },
+    loadKnob: {
+      group: load.k,
+      setTurn(t01) {           // VIEW -> LOAD; the dial ring lights up as it clicks into LOAD
+        load.k.rotation.z = -t01 * Math.PI / 2;
+        load.ringMat.emissiveIntensity = 2.2 * THREE.MathUtils.smoothstep(t01, 0.85, 1);
+      },
+    },
+    langKnob: { group: langKnob.k, setLang(l) { langTarget = -LANG_ANGLE[l]; } },
     setGateGlow(v) { M.glow.color.setRGB(1, 0.62, 0.25).multiplyScalar(v); },
     setLampLevel(k) { spot.intensity = 95 * k; },
     setScreenPower(extra) { glass.material.emissiveIntensity = 0.8 + extra; },
     update(time, dt) {
-      langKnob.rotation.z += (langTarget - langKnob.rotation.z) * (1 - Math.exp(-14 * dt));
+      langKnob.k.rotation.z += (langTarget - langKnob.k.rotation.z) * (1 - Math.exp(-14 * dt));
       for (let i = 0; i < N; i++) {
         pos[i * 3] = base[i * 3] + Math.sin(time * 0.21 + seed[i]) * 0.08;
         pos[i * 3 + 1] = base[i * 3 + 1] + Math.sin(time * 0.13 + seed[i] * 2) * 0.1;

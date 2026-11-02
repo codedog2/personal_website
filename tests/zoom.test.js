@@ -1,3 +1,4 @@
+import { CONFIG } from '../src/config.js';
 import { zoomDistance, easeInOutCubic, loadTimeline, unloadTimeline } from '../src/scene/zoom.js';
 
 const tanHalf = Math.tan((34 / 2) * Math.PI / 180);
@@ -24,7 +25,7 @@ test('easeInOutCubic endpoints and midpoint', () => {
 
 test('timelines start and end correctly', () => {
   expect(loadTimeline(0)).toEqual({ knob: 0, zoom: 0, done: false });
-  expect(loadTimeline(1.5)).toMatchObject({ knob: 1, zoom: 1, done: true });
+  expect(loadTimeline(CONFIG.TIMING.LOAD_DONE + 0.05)).toMatchObject({ knob: 1, zoom: 1, done: true });
   expect(unloadTimeline(0)).toMatchObject({ knob: 1, zoom: 1, done: false });
   expect(unloadTimeline(1.1)).toMatchObject({ knob: 0, zoom: 0, done: true });
 });
@@ -32,4 +33,11 @@ test('timelines start and end correctly', () => {
 test('knob turns before the camera moves', () => {
   const mid = loadTimeline(0.2);
   expect(mid.knob).toBeGreaterThan(0); expect(mid.zoom).toBe(0);
+});
+
+test('the knob finishes turning before the camera starts moving, slowly enough to see', () => {
+  const T = CONFIG.TIMING;
+  expect(T.KNOB).toBeGreaterThanOrEqual(0.5);
+  expect(loadTimeline(T.KNOB)).toMatchObject({ knob: 1, zoom: 0 });
+  expect(loadTimeline(T.LOAD_DONE).zoom).toBe(1);
 });
