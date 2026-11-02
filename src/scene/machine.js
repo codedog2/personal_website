@@ -25,7 +25,7 @@ export function buildMachine(stage, lang) {
     ironMid: new THREE.MeshStandardMaterial({ color: 0x4a3f33, metalness: 0.8, roughness: 0.85, roughnessMap: grunge }),
     wood: new THREE.MeshStandardMaterial({ map: woodTex(), roughness: 0.62 }),
     glow: new THREE.MeshBasicMaterial({ color: 0xffa040 }),
-    bulb: new THREE.MeshStandardMaterial({ color: 0xffe0a8, emissive: 0xffc070, emissiveIntensity: 9 }),
+    bulb: new THREE.MeshStandardMaterial({ color: 0xffe0a8, emissive: 0xffc070, emissiveIntensity: 4.5 }),
     pointer: new THREE.MeshStandardMaterial({ color: 0xf2e2c0, roughness: 0.4 }),
   };
 
@@ -236,13 +236,13 @@ export function buildMachine(stage, lang) {
   const shadeGeo = new THREE.LatheGeometry(profile, 64).rotateX(Math.PI / 2);                 // opening faces +z (towards the gate)
   const outer = mesh(shadeGeo, new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: brassTex.map, bumpMap: brassTex.bump, bumpScale: 0.6,
     roughnessMap: brassTex.rough, roughness: 0.75, metalness: 1, side: THREE.FrontSide }), [0, 0, 0], shade);
-  const inner = mesh(shadeGeo, new THREE.MeshStandardMaterial({ color: 0xf3e6c8, emissive: 0xffc070, emissiveIntensity: 0.5, roughness: 0.6, side: THREE.BackSide }), [0, 0, 0], shade);
+  const inner = mesh(shadeGeo, new THREE.MeshStandardMaterial({ color: 0xf3e6c8, emissive: 0xffc070, emissiveIntensity: 0.25, roughness: 0.6, side: THREE.BackSide }), [0, 0, 0], shade);
   mesh(new THREE.TorusGeometry(0.235, 0.008, 8, 64), M.brass, [0, 0, 0.34], shade);
   mesh(new THREE.CylinderGeometry(0.03, 0.035, 0.08, 20).rotateX(Math.PI / 2), M.ironMid, [0, 0, 0.04], shade);   // socket
   mesh(new THREE.SphereGeometry(0.055, 20, 14), M.bulb, [0, 0, 0.13], shade);
   for (const m of [outer, inner]) m.castShadow = false;                                      // the spot sits inside the shade
   const lampHead = shade.localToWorld(new THREE.Vector3(0, 0, 0.18));
-  const spot = new THREE.SpotLight(0xffb066, 70, 0, 0.5, 0.65, 2);
+  const spot = new THREE.SpotLight(0xffb066, CONFIG.LAMP_INTENSITY, 0, 0.5, 0.7, 2);
   spot.position.copy(lampHead); spot.target.position.copy(FILM_C);
   spot.castShadow = true; spot.shadow.mapSize.set(2048, 2048); spot.shadow.bias = -0.0004; spot.shadow.normalBias = 0.02;
   scene.add(spot, spot.target);
@@ -270,7 +270,7 @@ export function buildMachine(stage, lang) {
     },
     langKnob: { group: langKnob.k, setLang(l) { langTarget = -LANG_ANGLE[l]; } },
     setGateGlow(v) { M.glow.color.setRGB(1, 0.62, 0.25).multiplyScalar(v); },
-    setLampLevel(k) { spot.intensity = 95 * k; },
+    setLampLevel(k) { spot.intensity = CONFIG.LAMP_INTENSITY * k; },
     setScreenPower(extra) { glass.material.emissiveIntensity = 0.8 + extra; },
     update(time, dt) {
       langKnob.k.rotation.z += (langTarget - langKnob.k.rotation.z) * (1 - Math.exp(-14 * dt));

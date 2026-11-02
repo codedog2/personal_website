@@ -35,6 +35,7 @@ export const CONFIG = Object.freeze({
   RIG: Object.freeze({ COLUMN: [0, -1.85], BOOM_Y: 3.42, BEAM_Z: 0.3 }),   // column foot (x, z); boom height; cross beam depth
   CONSOLE: Object.freeze({ POS: [0, 1.0, 0.15], SIZE: [1.15, 0.36], KNOB_X: 0.3 }),
   LAMP: [1.72, 2.5, 0.35],  // shade of the lamp hanging from the front cross beam, aimed at the reading gate
+  LAMP_INTENSITY: 42,       // spot brightness on the reading gate
 });
 
 /** Normalise a deploy path (e.g. "portfolio") into Vite's `base` form ("/portfolio/"). */
