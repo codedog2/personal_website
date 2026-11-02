@@ -9,7 +9,7 @@ import { CONFIG } from '../config.js';
 import { SECTIONS } from '../core/content.js';
 import { t } from '../core/i18n.js';
 import { canvasTex, grungeTex, woodTex, windowTex, drawDial, ensureFonts, agedBrassMaps, flangeAlpha, filmPackFaceTex } from './textures.js';
-import { filmPose, reelHub } from './film.js';
+import { filmPose, reelHub, guideExit } from './film.js';
 import { clockText } from './clock.js';
 
 const V = (a) => new THREE.Vector3(...a);
@@ -118,6 +118,17 @@ export function buildMachine(stage, models, lang) {
   for (const [x, y, w, h] of [[0, gh / 2 - 0.022, gw - 0.02, 0.008], [0, -gh / 2 + 0.022, gw - 0.02, 0.008], [gw / 2 - 0.022, 0, 0.008, gh - 0.03], [-gw / 2 + 0.022, 0, 0.008, gh - 0.03]]) {
     mesh(new THREE.PlaneGeometry(w, h), M.glow, [x, y, 0.047], gate).castShadow = false;
   }
+  // guide boxes at the strip ends: the frames disappear into them; the film leaves over a brass roller on top
+  for (const side of [-1, 1]) {
+    const box = new THREE.Group(); filmPose(side * (CONFIG.STRIP_END + 0.12), box); scene.add(box);
+    mesh(new RoundedBoxGeometry(0.34, 1.08, 0.3, 3, 0.04), M.iron, [0, 0, -0.04], box);
+    for (const y of [-0.5, 0.5]) mesh(new THREE.BoxGeometry(0.36, 0.03, 0.32), M.brass, [0, y, -0.04], box);
+    mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.32, 16).rotateX(Math.PI / 2), M.brassDark, [0, -0.2, 0.12], box);
+    const exit = guideExit(side), rollerR = 0.075;
+    mesh(new THREE.CylinderGeometry(rollerR, rollerR, CONFIG.REEL.DEPTH * 1.5, 32).rotateX(Math.PI / 2), M.brass, [exit.x - side * rollerR, exit.y - 0.02, exit.z]);
+    mesh(new THREE.CylinderGeometry(0.02, 0.02, CONFIG.REEL.DEPTH * 1.9, 12).rotateX(Math.PI / 2), M.ironMid, [exit.x - side * rollerR, exit.y - 0.02, exit.z]);
+    rod(new THREE.Vector3(exit.x - side * rollerR, exit.y - 0.02, exit.z - CONFIG.REEL.DEPTH), new THREE.Vector3(exit.x - side * rollerR, 0.95, 0.42), 0.022, M.ironMid);
+  }
   rod(new THREE.Vector3(-CONFIG.STRIP_END, 0.16, 1.32), new THREE.Vector3(CONFIG.STRIP_END, 0.16, 1.32), 0.035, M.brass);
   const ruler = canvasTex(2048, 64, (g, w) => {
     g.fillStyle = '#2a2016'; g.fillRect(0, 0, w, 64); g.strokeStyle = '#c8a46a';
@@ -185,7 +196,7 @@ export function buildMachine(stage, models, lang) {
     const mount = group([x, 0.02, 0.046], panel);
     const dial = canvasTex(512, 512, c => drawDial(c.canvas, labels, 0.76));
     mesh(new THREE.CircleGeometry(DIAL_R, 64), new THREE.MeshStandardMaterial({ map: dial, metalness: 0.4, roughness: 0.55 }), [0, 0, 0.001], mount);
-    const ringMat = new THREE.MeshStandardMaterial({ color: 0x1a120a, emissive: 0xffa040, emissiveIntensity: 0 });
+    const ringMat = new THREE.MeshStandardMaterial({ color: 0x8a6232, metalness: 1, roughness: 0.5 });   // brass bezel ring
     mesh(new THREE.RingGeometry(DIAL_R * 0.98, DIAL_R * 1.06, 64), ringMat, [0, 0, 0.002], mount);
     const k = new THREE.Group(); mount.add(k);
     mesh(new THREE.CylinderGeometry(0.068, 0.074, 0.07, 40).rotateX(Math.PI / 2), M.brass, [0, 0, 0.035], k);
@@ -242,10 +253,7 @@ export function buildMachine(stage, models, lang) {
     screen: { rig, glass, bezel, restPos: rig.position.clone(), drawIdle },
     loadKnob: {
       group: load.k,
-      setTurn(t01) {           // VIEW -> LOAD; the dial ring lights up as it clicks into LOAD
-        load.k.rotation.z = -t01 * Math.PI / 2;
-        load.ringMat.emissiveIntensity = 2.2 * THREE.MathUtils.smoothstep(t01, 0.85, 1);
-      },
+      setTurn(t01) { load.k.rotation.z = -t01 * Math.PI / 2; },   // VIEW -> LOAD
     },
     langKnob: { group: langKnob.k, setLang(l) { langTarget = -LANG_ANGLE[l]; } },
     setGateGlow(v) { M.glow.color.setRGB(1, 0.62, 0.25).multiplyScalar(v); },

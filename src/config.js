@@ -29,10 +29,10 @@ export const CONFIG = Object.freeze({
   BEND: 0.045,              // how much the strip curves back at its ends
   TILT: -0.62,              // strip leans back at the reading gate
   LEAD: 5,                  // leader frames on each side
-  STRIP_END: 2.4,           // the strip is clipped here and continues as a ribbon up to the reels
-  REEL: Object.freeze({ X: 2.35, Y: [2.1, 1.38], Z: -1.2, R: 0.55, DEPTH: 0.16 }),   // [left, right] heights differ on purpose; hung on rods
+  STRIP_END: 2.4,           // the strip runs into a guide box here; a narrow film runs from its roller up to the reel
+  REEL: Object.freeze({ X: 2.5, Y: [1.78, 1.28], Z: 0.45, R: 0.46, DEPTH: 0.14 }),   // [left, right] heights differ on purpose; hung on rods
   SCREEN: Object.freeze({ REST: [0, 2.2, -1.05], BEZEL: [2.62, 1.82], GLASS: [2.3, 1.5], SLIDE: 0.9 }),
-  RIG: Object.freeze({ COLUMN: [0, -1.85], BOOM_Y: 3.42, BEAM_Z: -1.45 }),   // column foot (x, z); boom height; cross beam depth
+  RIG: Object.freeze({ COLUMN: [0, -1.85], BOOM_Y: 3.42, BEAM_Z: 0.3 }),   // column foot (x, z); boom height; cross beam depth
   CONSOLE: Object.freeze({ POS: [0, 1.0, 0.15], SIZE: [1.15, 0.36], KNOB_X: 0.3 }),
   LAMP: [4.05, 0, -2.6],   // behind and above the right reel
 });

@@ -1,6 +1,6 @@
 // The film strip: leader frames, one frame per section, leader frames. It lies across the bench in
-// front of the screen; at ±STRIP_END it is clipped and carries on as a ribbon that twists up onto
-// the reels hanging beside the screen.
+// front of the screen and runs into a guide box at each end (the frames are clipped inside it); from
+// the guide roller on top a narrow film runs up onto the reel hanging beside the screen.
 import * as THREE from 'three';
 import { CONFIG } from '../config.js';
 import { SECTIONS } from '../core/content.js';
@@ -31,19 +31,17 @@ export function reelHub(side) {
   return new THREE.Vector3(side * REEL.X, REEL.Y[side < 0 ? 0 : 1], REEL.Z);
 }
 
-/** Path of the ribbon from the clipped strip end (t = 0) to the outer side of a reel's film pack (t = 1).
+/** Where the film leaves the top of the guide roller at a strip end. */
+export function guideExit(side) {
+  return new THREE.Vector3(side * (STRIP_END + 0.12), 1.1, REEL.Z);
+}
+
+/** Path of the film from the guide roller (t = 0) up to the inner side of a reel's film pack (t = 1).
  *  side: -1 = feed reel (left), 1 = take-up reel (right). packR: current radius of the wound film. */
 export function ribbonCurve(side, packR) {
-  const s = side * STRIP_END;
-  const start = new THREE.Vector3(CX + s, CY + BEND * 0.15 * s * s, CZ - BEND * s * s);
-  const out = new THREE.Vector3(1, 2 * BEND * 0.15 * s, -2 * BEND * s).normalize().multiplyScalar(side);
-  const end = reelHub(side).add(new THREE.Vector3(side * packR, 0, 0));
-  return new THREE.CubicBezierCurve3(
-    start,
-    start.clone().addScaledVector(out, 1.5),            // keeps running along the strip before it lifts
-    end.clone().add(new THREE.Vector3(0, -1.15, 0)),    // arrives travelling straight up: tangent to the pack
-    end,
-  );
+  const start = guideExit(side), end = reelHub(side).add(new THREE.Vector3(-side * packR, 0, 0));
+  const up = new THREE.Vector3(0, 1, 0), lift = (end.y - start.y) * 0.4;
+  return new THREE.CubicBezierCurve3(start, start.clone().addScaledVector(up, lift), end.clone().addScaledVector(up, -lift), end);
 }
 
 function ribbonTexture() {
@@ -78,8 +76,7 @@ export function buildFilm(stage, lang) {
     meshes.push(mesh);
   }
 
-  // ---- ribbons: a flat band along ribbonCurve that twists from lying across the strip to the reel's plane
-  const startUp = (() => { const o = new THREE.Object3D(); filmPose(STRIP_END, o); return new THREE.Vector3(0, 1, 0).applyQuaternion(o.quaternion); })();
+  // ---- ribbons: an even-width film along ribbonCurve, lying in the reel's plane (width along z)
   const ribbons = [-1, 1].map(side => {
     const map = ribbonTexture();
     const mat = new THREE.MeshPhysicalMaterial({ map, transparent: true, roughness: 0.32, metalness: 0, clearcoat: 0.6, clearcoatRoughness: 0.25, side: THREE.DoubleSide });
@@ -95,7 +92,7 @@ export function buildFilm(stage, lang) {
     stage.scene.add(mesh);
     return { side, mesh, map, packR: -1 };
   });
-  const endUp = new THREE.Vector3(0, 0, 1);
+  const across = new THREE.Vector3(0, 0, 1);
 
   function shapeRibbon(r, packR) {
     if (Math.abs(r.packR - packR) < 0.004) return;
@@ -106,12 +103,11 @@ export function buildFilm(stage, lang) {
     for (let i = 0; i <= RIBBON_SEGMENTS; i++) {
       const k = i / RIBBON_SEGMENTS, p = curve.getPoint(k), tan = curve.getTangent(k);
       length += p.distanceTo(prev); prev = p;
-      const w = startUp.clone().lerp(endUp, THREE.MathUtils.smootherstep(k, 0.2, 0.85));   // a slow, even twist
-      w.addScaledVector(tan, -w.dot(tan)).normalize();
-      const half = THREE.MathUtils.lerp(FH * 0.46, REEL.DEPTH * 0.45, THREE.MathUtils.smootherstep(k, 0.0, 0.38));   // narrows while still flat, then lifts
+      const w = across.clone().addScaledVector(tan, -across.dot(tan)).normalize();
+      const half = REEL.DEPTH * 0.45;
       pos.setXYZ(i * 2, p.x + w.x * half, p.y + w.y * half, p.z + w.z * half);
       pos.setXYZ(i * 2 + 1, p.x - w.x * half, p.y - w.y * half, p.z - w.z * half);
-      uv.setXY(i * 2, length / P, 1); uv.setXY(i * 2 + 1, length / P, 0);
+      uv.setXY(i * 2, length / (REEL.DEPTH * 1.6), 1); uv.setXY(i * 2 + 1, length / (REEL.DEPTH * 1.6), 0);
     }
     pos.needsUpdate = uv.needsUpdate = true;
     r.mesh.geometry.computeVertexNormals();
@@ -144,7 +140,7 @@ export function buildFilm(stage, lang) {
         m.translateZ(0.05 * act * act);
         m.material.emissiveIntensity = 0.04 + 0.62 * act * act * act;
       }
-      ribbons.forEach((r, i) => { shapeRibbon(r, packs[i]); r.map.offset.x = offset / P; });
+      ribbons.forEach((r, i) => { shapeRibbon(r, packs[i]); r.map.offset.x = r.side * offset / (REEL.DEPTH * 1.6); });
     },
     /** Section index for a hit on the strip, or null (leaders, or the clipped-away part of a frame). */
     frameAt(hit) {
