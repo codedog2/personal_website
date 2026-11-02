@@ -87,6 +87,14 @@
 .paper .badge .bn { font-size: calc(1.25 * var(--u)); margin-top: calc(.8 * var(--u)); line-height: 1.4; }
 .paper .badge.locked .bn { color: #8a7d68; }
 
+/* greeting page */
+.paper .greet { font-family: var(--mono); }
+.paper .greet .greet-hi { font-family: var(--serif); font-size: calc(4 * var(--u)); margin: calc(.8 * var(--u)) 0 calc(2.2 * var(--u)); min-height: 1.2em; }
+.paper .greet .greet-line:not(.greet-hi) { font-size: calc(1.7 * var(--u)); line-height: 2; min-height: 2em; color: #3a2a18; letter-spacing: .02em; }
+.paper .greet .greet-verdict { margin-top: calc(1.2 * var(--u)); color: #7a4a22; }
+.paper .greet .typing::after, .paper .greet .connecting::after { content: "▌"; margin-left: .15em; animation: greet-caret .7s steps(1) infinite; }
+@keyframes greet-caret { 50% { opacity: 0; } }
+
 @media (prefers-reduced-motion: reduce) {
   .paper .medal::after, .paper .note { animation: none; }
 }

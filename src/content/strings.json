@@ -271,5 +271,10 @@
     "en": "▶ ANY KEY OR CLICK TO CONTINUE",
     "zh": "▶ 按任意键或点击继续",
     "ja": "▶ 何かキーを押すかクリックして続ける"
+  },
+  "greet.connecting": {
+    "en": "connecting to the archive…",
+    "zh": "正在连接档案馆…",
+    "ja": "アーカイブに接続中…"
   }
 }

@@ -64,3 +64,13 @@ test('skip before loading finishes holds on the loading frame instead of reveali
   release(); await vi.runAllTimersAsync();
   expect(done).toBe(true);
 });
+
+test('beforeReveal runs once, just before the overlay fades (so the scene can be set up underneath)', async () => {
+  const root = mk(); const beforeReveal = vi.fn(); let done = false;
+  runIntro(root, opts({ beforeReveal })).then(() => { done = true; });
+  await vi.advanceTimersByTimeAsync(introSchedule(false).end + 10);
+  expect(beforeReveal).toHaveBeenCalledTimes(1);
+  expect(root.querySelector('.intro')).not.toBeNull();     // still covering the scene
+  await vi.runAllTimersAsync();
+  expect(done).toBe(true); expect(beforeReveal).toHaveBeenCalledTimes(1);
+});

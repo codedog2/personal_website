@@ -32,5 +32,5 @@ await runIntro(document.body, {
   seen: view === '2d' || readPref('introSeen', false),   // 2D always gets the short version
   lang: document.documentElement.lang,
   reducedMotion,
+  beforeReveal: () => scene?.greet(),
 });
-scene?.greet();

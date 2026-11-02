@@ -33,7 +33,7 @@ export function reelHub(side) {
 
 /** Where the film leaves the top of the guide roller at a strip end. */
 export function guideExit(side) {
-  return new THREE.Vector3(side * (STRIP_END + 0.12), 1.1, REEL.Z);
+  return new THREE.Vector3(side * (STRIP_END + 0.09), 1.02, REEL.Z);
 }
 
 /** Path of the film from the guide roller (t = 0) up to the inner side of a reel's film pack (t = 1).

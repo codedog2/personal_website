@@ -13,7 +13,7 @@ export function introSchedule(seen) {
     : { lampOn: 800, typeStart: 900, typeEnd: 3300, answerAt: 3700, end: 5000 };
 }
 
-export function runIntro(root, { ready, seen, lang, reducedMotion }) {
+export function runIntro(root, { ready, seen, lang, reducedMotion, beforeReveal }) {
   const plan = introSchedule(seen);
   const question = t('intro.question', lang);
   const q = el('div', { class: 'intro-q', 'data-text': question });
@@ -46,6 +46,7 @@ export function runIntro(root, { ready, seen, lang, reducedMotion }) {
       finished = true;
       timers.forEach(clearTimeout);
       writePref('introSeen', true);
+      try { beforeReveal?.(); } catch (err) { console.error('[intro] beforeReveal failed', err); }   // set the scene up under the overlay
       overlay.classList.add('out');
       setTimeout(() => { overlay.remove(); resolve(); }, FADE_MS);
     };

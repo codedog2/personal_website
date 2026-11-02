@@ -13,7 +13,8 @@ import { buildFilm } from './film.js';
 import { createFilm, dragStart, dragMove, dragEnd, wheel, nudge, goTo, stepFilm, filmIndex, isSettled } from './filmPhysics.js';
 import { zoomDistance, loadTimeline, unloadTimeline } from './zoom.js';
 import { READER, nextReader, canBrowse, routeKey } from './readerMachine.js';
-import { gatherGreetingData, greetingLines } from '../core/greeting.js';
+import { gatherGreetingData } from '../core/greeting.js';
+import { renderGreeting } from '../sections/greeting.js';
 
 const CANVAS_FONTS = ['600 64px "Cormorant Garamond"', 'italic 500 64px "Cormorant Garamond"', '500 32px "IBM Plex Mono"', '600 64px "Noto Serif SC"', '600 64px "Noto Serif JP"'];
 const POWER_ON_AT = 1.2;   // seconds into the load timeline when the screen flickers on
@@ -73,25 +74,20 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     exitLabel.textContent = `◀ ${t('ui.back', lang)}`;
   }
 
-  // ---------------------------------------------------------------- greeting (after the intro)
-  const greetingData = gatherGreetingData().catch(() => null);   // starts now, overlaps the intro
-  let greeting = null;                                           // { lines, shown, holdUntil }
-  async function greet() {
-    const d = await greetingData;
-    if (!d || state !== READER.IDLE) return;
-    const lines = greetingLines(d, lang);
-    await machine.screen.prepareGreeting(lines, lang);
-    greeting = { lines, total: lines.join('\n').length, shown: 0, drawn: -1, holdUntil: null };
-  }
-  function endGreeting() {
-    if (!greeting) return false;
-    greeting = null;
-    machine.screen.drawIdle(filmIndex(physics), lang);
-    return true;
-  }
-
   // ---------------------------------------------------------------- reading state
-  let state = READER.IDLE, phase = 0, zt = 0, readingIdx = 0, poweredOn = false;
+  let state = READER.IDLE, phase = 0, zt = 0, readingIdx = 0, poweredOn = false, snapCamera = false;
+
+  // ---------------------------------------------------------------- greeting: the first thing on the pushed-in screen
+  const greetingData = gatherGreetingData().catch(() => null);   // starts now, overlaps the intro
+  const GREETING_HOLD_MS = 6000;
+  let greetingMode = false, greetingPage = null, greetingTimer = 0;
+  /** Called just before the intro fades: jump straight to the pushed-in screen showing the greeting. */
+  function greet() {
+    if (state !== READER.IDLE) return;
+    greetingMode = true; readingIdx = 0; goTo(physics, 0);
+    state = READER.ZOOMED; zt = 1; snapCamera = true;              // no push-in animation: the overlay is still on top
+    showReader();
+  }
 
   function load() {
     if (state !== READER.IDLE) return;
@@ -101,7 +97,12 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     sound.clunk(); setTimeout(() => sound.whirr(), 250);
   }
   function showReader() {
-    renderSection(readerBody, SECTIONS[readingIdx].id, { data, lang });
+    if (greetingMode) {
+      greetingPage = renderGreeting(readerBody, { lang, data: greetingData });
+      greetingPage.then(() => { greetingTimer = setTimeout(() => { if (greetingMode) unload(); }, GREETING_HOLD_MS); });
+    } else {
+      renderSection(readerBody, SECTIONS[readingIdx].id, { data, lang });
+    }
     reader.firstChild.scrollTop = 0;
     reader.classList.add('show');
     shell.classList.add('zoomed');
@@ -111,6 +112,7 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
   function unload() {
     if (state !== READER.ZOOMED) return;
     state = nextReader(state, 'BACK'); phase = 0;
+    clearTimeout(greetingTimer); greetingPage?.finishNow(); greetingPage = null;
     reader.classList.remove('show');
     shell.classList.remove('zoomed');
     if (shell.contains(document.activeElement)) document.activeElement.blur();
@@ -136,7 +138,6 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
 
   let drag = null;
   function onDown(e) {
-    if (endGreeting()) return;
     if (state === READER.ZOOMED) { unload(); return; }       // clicking the dimmed machine backs out
     if (!canBrowse(state)) return;
     drag = { x: e.clientX, y: e.clientY, lastX: e.clientX, lastT: performance.now(), moved: 0 };
@@ -174,12 +175,11 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
   }
   function onWheel(e) {
     e.preventDefault();
-    endGreeting();
     if (canBrowse(state) && !drag) wheel(physics, e.deltaY + e.deltaX);
   }
   function onKey(e) {
     if (document.querySelector('.intro')) return;        // the scene is still behind the opening sequence
-    if (endGreeting()) { e.preventDefault(); return; }
+    if (greetingMode && state === READER.ZOOMED && !['Tab', 'Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) { e.preventDefault(); unload(); return; }   // any key leaves the greeting
     const action = routeKey(state, e.key);
     if (action === 'next') nudge(physics, 1);
     else if (action === 'prev') nudge(physics, -1);
@@ -199,7 +199,11 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     lang = l; document.documentElement.lang = l;
     film.relabel(l); machine.screen.drawIdle(filmIndex(physics), l); machine.langKnob.setLang(l);
     paintChrome();
-    if (state === READER.ZOOMED) { renderSection(readerBody, SECTIONS[readingIdx].id, { data, lang }); reader.classList.remove('flash'); void reader.offsetWidth; reader.classList.add('flash'); }
+    if (state === READER.ZOOMED) {
+      if (greetingMode) { greetingPage = renderGreeting(readerBody, { lang, data: greetingData }); greetingPage.finishNow(); }
+      else renderSection(readerBody, SECTIONS[readingIdx].id, { data, lang });
+      reader.classList.remove('flash'); void reader.offsetWidth; reader.classList.add('flash');
+    }
   });
 
   // ---------------------------------------------------------------- per-frame
@@ -227,14 +231,7 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
       lastIdx = idx; machine.screen.drawIdle(idx, lang);
     }
     const minute = Math.floor(Date.now() / 60000);
-    if (minute !== lastMinute && !greeting) { lastMinute = minute; machine.screen.drawIdle(idx, lang); }   // keep the screen clock current
-    if (greeting) {
-      greeting.shown = Math.min(greeting.total, greeting.shown + dt * 42);
-      const shown = Math.floor(greeting.shown), blink = Math.floor(now / 500);   // redraw on new characters or a cursor blink
-      if (shown !== greeting.drawn || blink !== greeting.blink) { greeting.drawn = shown; greeting.blink = blink; machine.screen.drawGreeting(greeting.lines, shown, lang); }
-      if (shown >= greeting.total && greeting.holdUntil == null) greeting.holdUntil = now + 7000;
-      if (greeting.holdUntil != null && now > greeting.holdUntil) endGreeting();
-    }
+    if (minute !== lastMinute) { lastMinute = minute; machine.screen.drawIdle(idx, lang); }   // keep the screen clock current
     machine.rewinds.left.setSpin(physics.offset / packs[0]); machine.rewinds.right.setSpin(physics.offset / packs[1]);
     machine.setGateGlow(state === READER.IDLE && isSettled(physics) ? 3.2 + Math.sin(time * 3) * 0.6 : 1.4);
 
@@ -248,8 +245,9 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     } else if (state === READER.UNLOADING) {
       phase += dt * speed;
       const tl = unloadTimeline(phase);
-      machine.loadKnob.setTurn(tl.knob); zt = tl.zoom;
-      if (tl.done) { state = nextReader(state, 'UNLOADED'); zt = 0; }
+      if (!greetingMode) machine.loadKnob.setTurn(tl.knob);   // the greeting never turned the knob
+      zt = tl.zoom;
+      if (tl.done) { state = nextReader(state, 'UNLOADED'); zt = 0; greetingMode = false; }
     }
 
     const rig = machine.screen.rig;
@@ -260,7 +258,8 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     tLook.copy(IDLE_LOOK).add(new THREE.Vector3(mouse.x * 0.1, mouse.y * 0.05, 0));
     if (calm) { tPos.copy(IDLE_POS); tLook.copy(IDLE_LOOK); }
     tPos.lerp(zPos, zt); tLook.lerp(zLook, zt);
-    const follow = zt > 0 && zt < 1 ? 1 : 1 - Math.exp(-5 * dt);
+    const follow = snapCamera || (zt > 0 && zt < 1) ? 1 : 1 - Math.exp(-5 * dt);
+    snapCamera = false;
     camPos.lerp(tPos, follow); camLook.lerp(tLook, follow);
     camera.position.copy(camPos); camera.lookAt(camLook);
 
