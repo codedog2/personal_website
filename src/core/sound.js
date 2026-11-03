@@ -37,7 +37,10 @@ export function createSound(AudioCtor = globalThis.AudioContext) {
     tick() { noise(0.025, 3200, 4, 0.5); },
     clunk() { noise(0.06, 900, 2, 0.8); tone(110, 40, 0.18, 0.5, 0.01); },
     whirr() { for (let i = 0; i < 10; i++) noise(0.03, 1800 + i * 60, 6, 0.18, i * 0.07); },
-    powerOn() { tone(60, 180, 0.4, 0.18, 0, 'sawtooth'); },
+    powerOn() {                // a camera-shutter / iris "click–clack": two short mechanical strokes, no electronic tone
+      noise(0.025, 3200, 2, 0.5); tone(180, 90, 0.06, 0.25);
+      noise(0.03, 2200, 2, 0.4, 0.11); tone(140, 70, 0.08, 0.22, 0.11);
+    },
   };
   return api;
 }
