@@ -17,6 +17,7 @@ import { renderGreeting } from '../sections/greeting.js';
 
 const CANVAS_FONTS = ['600 64px "Cormorant Garamond"', 'italic 500 64px "Cormorant Garamond"', '500 32px "IBM Plex Mono"', '600 64px "Noto Serif SC"', '600 64px "Noto Serif JP"'];
 const POWER_ON_AT = 1.2;   // seconds into the load timeline when the screen flickers on
+const SHUTTER_DELAY_MS = 60;   // the reader's poweron animation is first visible ~66ms in; the click lands with it
 
 export async function mountScene(root, { sound, switchView, lowPower = false, calm = false }) {
   await Promise.race([Promise.all(CANVAS_FONTS.map(f => document.fonts.load(f, 'Aa中日'))), new Promise(r => setTimeout(r, 2500))]);
@@ -67,7 +68,7 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
   }
 
   // ---------------------------------------------------------------- reading state
-  let state = READER.IDLE, phase = 0, zt = 0, readingIdx = 0, poweredOn = false, snapCamera = false;
+  let state = READER.IDLE, phase = 0, zt = 0, readingIdx = 0, snapCamera = false;
 
   // ---------------------------------------------------------------- greeting: the first thing on the pushed-in screen
   const greetingData = gatherGreetingData().catch(() => null);   // starts now, overlaps the intro
@@ -85,7 +86,7 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
     if (state !== READER.IDLE) return;
     readingIdx = filmIndex(physics);
     goTo(physics, readingIdx);
-    state = nextReader(state, 'LOAD'); phase = 0; poweredOn = false;
+    state = nextReader(state, 'LOAD'); phase = 0;
     sound.clunk(); setTimeout(() => sound.whirr(), 250);
   }
   function showReader() {
@@ -94,6 +95,7 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
       greetingPage.then(() => { greetingTimer = setTimeout(() => { if (greetingMode) unload(); }, GREETING_HOLD_MS); });
     } else {
       renderSection(readerBody, SECTIONS[readingIdx].id, { data, lang });
+      setTimeout(() => sound.powerOn(), SHUTTER_DELAY_MS);
     }
     reader.firstChild.scrollTop = 0;
     reader.classList.add('show');
@@ -237,7 +239,6 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
       phase += dt * speed;
       const tl = loadTimeline(phase);
       machine.loadKnob.setTurn(tl.knob); zt = tl.zoom;
-      if (phase > POWER_ON_AT && !poweredOn) { poweredOn = true; sound.powerOn(); }
       machine.setScreenPower(phase > POWER_ON_AT && !tl.done && !calm ? Math.random() * 0.45 : 0);
       if (tl.done) { state = nextReader(state, 'LOADED'); zt = 1; machine.setScreenPower(0); showReader(); }
     } else if (state === READER.UNLOADING) {
