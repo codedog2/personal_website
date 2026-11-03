@@ -34,7 +34,7 @@ export const CONFIG = Object.freeze({
   SCREEN: Object.freeze({ REST: [0, 2.2, -1.05], BEZEL: [2.62, 1.82], GLASS: [2.3, 1.5], SLIDE: 0.9 }),
   RIG: Object.freeze({ COLUMN: [0, -1.85], BOOM_Y: 3.42, BEAM_Z: 0.3 }),   // column foot (x, z); boom height; cross beam depth
   // knob bar: a brass crossbar on two posts; each knob is a chicken-head pointer over a dial plate with an engraved arc
-  CONSOLE: Object.freeze({ POS: [0, 1.17, 0.15], HALF: 0.72, KNOB_X: 0.4, PLATE_R: 0.25 }),
+  CONSOLE: Object.freeze({ POS: [0, 1.12, 0.15], HALF: 0.56, KNOB_X: 0.3, PLATE_R: 0.175 }),
   KNOBS: Object.freeze({
     ARC: 1.05,                                         // engraved arc spans ±60° from 12 o'clock
     STOPS: Object.freeze({                             // pointer angles, radians clockwise from 12 o'clock

@@ -215,7 +215,8 @@ export function buildMachine(stage, lang) {
   head.bezierCurveTo(0.046, -0.07, -0.046, -0.07, -0.048, -0.02);
   head.bezierCurveTo(-0.05, 0.02, -0.03, 0.12, 0, 0.13);
   const headGeo = new THREE.ExtrudeGeometry(head, { depth: 0.045, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.01, bevelSegments: 4, curveSegments: 24 });
-  const knobBrass = new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: brassTex.map, bumpMap: brassTex.bump, bumpScale: 0.4, roughnessMap: brassTex.rough, roughness: 0.6, metalness: 1, clearcoat: 0.3 });
+  // satin, slightly darkened brass so the lamp's highlight doesn't flare (bloom) on the pointer
+  const knobBrass = new THREE.MeshStandardMaterial({ color: 0x9a8064, map: brassTex.map, bumpMap: brassTex.bump, bumpScale: 0.4, roughnessMap: brassTex.rough, roughness: 1, metalness: 0.85 });
   const knobs = {};
   function knob(name, x, stops) {
     const unit = group([kx + x, ky, kz]);
@@ -227,7 +228,7 @@ export function buildMachine(stage, lang) {
     const plateMat = new THREE.MeshStandardMaterial({ map: dialTex, metalness: 0.35, roughness: 0.6, color: 0xc7c7c7 });   // a little dim until hovered
     mesh(new THREE.CylinderGeometry(PLATE_R + 0.012, PLATE_R + 0.016, 0.03, 64).rotateX(Math.PI / 2), M.brassDark, [0, 0, -0.016], unit);
     mesh(new THREE.CircleGeometry(PLATE_R, 64), plateMat, [0, 0, 0.0005], unit);
-    const spinner = new THREE.Group(); spinner.position.z = 0.004; unit.add(spinner);
+    const spinner = new THREE.Group(); spinner.position.z = 0.004; spinner.scale.setScalar(PLATE_R / 0.25); unit.add(spinner);   // pointer modelled for a 0.25 plate
     // skirt: a short knurled collar under the pointer
     mesh(new THREE.CylinderGeometry(0.062, 0.07, 0.03, 40).rotateX(Math.PI / 2), M.brassDark, [0, 0, 0.015], spinner);
     for (let i = 0; i < 24; i++) {
@@ -235,12 +236,12 @@ export function buildMachine(stage, lang) {
       mesh(new THREE.BoxGeometry(0.006, 0.01, 0.028), M.iron, [Math.cos(a) * 0.068, Math.sin(a) * 0.068, 0.015], spinner).rotation.z = a;
     }
     mesh(headGeo, knobBrass, [0, 0, 0.03], spinner);
-    mesh(new THREE.BoxGeometry(0.008, 0.075, 0.004), M.pointer, [0, 0.065, 0.088], spinner);           // inlaid index line
+    mesh(new THREE.BoxGeometry(0.008, 0.075, 0.004), new THREE.MeshStandardMaterial({ color: 0xcdb894, roughness: 0.8 }), [0, 0.065, 0.088], spinner);   // inlaid index line, matte
     mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.012, 16).rotateX(Math.PI / 2), M.ironMid, [0, -0.015, 0.088], spinner);   // centre screw
     knobs[name] = { unit, spinner, plateMat, hover: 0, lift: 0 };
     return knobs[name];
   }
-  const load = knob('load', KNOB_X, [{ text: 'VIEW', angle: STOPS.load.view }, { text: 'LOAD', angle: STOPS.load.load }]);
+  const load = knob('load', KNOB_X, [{ text: 'VIEW', angle: STOPS.load.view }, { text: '', angle: STOPS.load.load }]);   // LOAD stop is a tick only
   load.spinner.rotation.z = -STOPS.load.view;
   const langKnob = knob('lang', -KNOB_X, [{ text: 'EN', angle: STOPS.lang.en }, { text: '中', angle: STOPS.lang.zh, size: 80 }, { text: '日', angle: STOPS.lang.ja, size: 80 }]);
   let langTarget = -STOPS.lang[lang];
