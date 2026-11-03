@@ -198,12 +198,12 @@ export function drawArcDial(canvas, stops, arc, pivot = 0) {
   const groove = (draw) => { g.save(); g.translate(0, 2); g.strokeStyle = 'rgba(255,220,160,.2)'; g.fillStyle = 'rgba(255,220,160,.2)'; draw(); g.restore(); g.strokeStyle = '#c09a62'; g.fillStyle = '#c09a62'; draw(); };
   groove(() => { g.lineWidth = 5; g.beginPath(); g.arc(c, py, c * 0.72, -Math.PI / 2 - arc, -Math.PI / 2 + arc); g.stroke(); });
   for (let a = -arc; a <= arc + 1e-6; a += arc / 6) groove(() => { const [x0, y0] = at(a, c * 0.72), [x1, y1] = at(a, c * 0.78); g.lineWidth = 3; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); });
-  for (const { angle } of stops) groove(() => { const [x0, y0] = at(angle, c * 0.67), [x1, y1] = at(angle, c * 0.83); g.lineWidth = 7; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); });
+  for (const { angle } of stops) groove(() => { const [x0, y0] = at(angle, c * 0.7), [x1, y1] = at(angle, c * 0.81); g.lineWidth = 3.5; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); });   // stops: just a longer tick
   g.textAlign = 'center'; g.textBaseline = 'middle';
   for (const { text, angle, size = 92 } of stops) {
     if (!text) continue;
     const [x, y] = at(angle, c * 0.99);
-    g.font = `600 ${size}px "IBM Plex Mono", "MS Mincho", "ＭＳ 明朝", "Noto Serif JP", "Noto Serif SC"`;
+    g.font = `400 ${size}px "IBM Plex Mono", "MS Mincho", "ＭＳ 明朝", "Noto Serif JP", "Noto Serif SC"`;   // all labels equal; the pointer shows the choice
     g.fillStyle = 'rgba(0,0,0,.6)'; g.fillText(text, x, y - 2);
     g.fillStyle = '#e2c08a'; g.fillText(text, x, y + 1);
   }

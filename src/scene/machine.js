@@ -243,7 +243,7 @@ export function buildMachine(stage, lang) {
   }
   const load = knob('load', KNOB_X, [{ text: 'VIEW', angle: STOPS.load.view }, { text: '', angle: STOPS.load.load }]);   // LOAD stop is a tick only
   load.spinner.rotation.z = -STOPS.load.view;
-  const langKnob = knob('lang', -KNOB_X, [{ text: 'EN', angle: STOPS.lang.en }, { text: '中', angle: STOPS.lang.zh, size: 80 }, { text: '日', angle: STOPS.lang.ja, size: 80 }]);
+  const langKnob = knob('lang', -KNOB_X, [{ text: 'EN', angle: STOPS.lang.en }, { text: '中', angle: STOPS.lang.zh }, { text: '日', angle: STOPS.lang.ja }]);
   let langTarget = -STOPS.lang[lang];
   langKnob.spinner.rotation.z = langTarget;
   let hovered = null;
