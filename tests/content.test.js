@@ -52,3 +52,12 @@ test('validator reports missing arrays that the renderers rely on', () => {
   expect(problems.some(p => p.includes('profile.contacts'))).toBe(true);
   expect(problems.some(p => p.includes('projects[0].stack'))).toBe(true);
 });
+
+test('validator flags a project in an unknown category and a category without a name', () => {
+  const bad = structuredClone(getContent());
+  bad.projects[0].category = 'gardening';
+  bad.projectCategories[0].name = {};
+  const problems = validateContent(bad);
+  expect(problems.some(p => p.includes('projects[0].category'))).toBe(true);
+  expect(problems.some(p => p.includes('projectCategories[0].name'))).toBe(true);
+});

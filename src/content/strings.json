@@ -107,6 +107,16 @@
     "zh": "← 全部项目",
     "ja": "← プロジェクト一覧"
   },
+  "ui.allCategories": {
+    "en": "← All Categories",
+    "zh": "← 全部分类",
+    "ja": "← カテゴリ一覧"
+  },
+  "ui.projectCount": {
+    "en": "{n} PROJECTS",
+    "zh": "{n} 个项目",
+    "ja": "{n} 件"
+  },
   "ui.overview": {
     "en": "OVERVIEW",
     "zh": "简介",

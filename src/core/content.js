@@ -43,7 +43,14 @@ export function validateContent(content) {
     need(s.note, `${where}.note`);
   }));
 
+  const cats = content.projectCategories || [];
+  cats.forEach((c, i) => {
+    if (!c.id) problems.push(`projectCategories[${i}]: needs an id`);
+    need(c.name, `projectCategories[${i}].name`);
+  });
+
   (content.projects || []).forEach((pr, i) => {
+    if (cats.length && !cats.some(c => c.id === pr.category)) problems.push(`projects[${i}].category: unknown category "${pr.category}"`);
     need(pr.name, `projects[${i}].name`);
     need(pr.summary, `projects[${i}].summary`);
     need(pr.overview, `projects[${i}].overview`);

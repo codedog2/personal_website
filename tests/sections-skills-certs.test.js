@@ -58,5 +58,7 @@ test('renderers survive missing optional arrays instead of throwing', () => {
   delete data.profile.bio; delete data.profile.education; delete data.profile.contacts; delete data.projects[0].stack; delete data.projects[0].links;
   for (const { id } of SECTIONS) expect(() => renderSection(host(), id, { data, lang: 'en' })).not.toThrow();
   const h = host(); renderSection(h, 'projects', { data, lang: 'en' });
-  expect(() => h.querySelector('.pf').click()).not.toThrow();
+  const cat = data.projectCategories.findIndex(c => c.id === data.projects[0].category);
+  expect(() => { h.querySelectorAll('.pf')[cat].click(); h.querySelector('.pf').click(); }).not.toThrow();
+  expect(h.querySelector('h2').textContent).toContain(data.projects[0].code);
 });

@@ -27,18 +27,103 @@
     "interests": { "en": "Game Dev · Cloud · Interactive Systems · Technology & Society", "zh": "游戏开发 · 云计算 · 交互系统 · 技术与社会", "ja": "ゲーム開発 · クラウド · インタラクティブシステム · テクノロジーと社会" }
   },
 
+  "projectCategories": [
+    {
+      "id": "ai",
+      "code": "AI",
+      "name": { "en": "AI", "zh": "AI", "ja": "AI" },
+      "summary": { "en": "Agents, memory and retrieval.", "zh": "智能体、记忆与检索。", "ja": "エージェント、記憶、検索。" },
+      "image": null
+    },
+    {
+      "id": "engineering",
+      "code": "ENG",
+      "name": { "en": "Engineering", "zh": "工程", "ja": "エンジニアリング" },
+      "summary": { "en": "Games, engines and tools.", "zh": "游戏、引擎与工具。", "ja": "ゲーム、エンジン、ツール。" },
+      "image": null
+    },
+    {
+      "id": "it-operations",
+      "code": "OPS",
+      "name": { "en": "IT Operations", "zh": "IT 运维", "ja": "IT 運用" },
+      "summary": { "en": "Systems, cloud and troubleshooting.", "zh": "系统、云与故障排查。", "ja": "システム、クラウド、トラブル対応。" },
+      "image": null
+    }
+  ],
   "projects": [
     {
-      "code": "P-01",
-      "name": { "en": "Localization Tool", "zh": "本地化工具", "ja": "ローカライズツール" },
-      "summary": { "en": "Keeps string tables in sync across languages.", "zh": "让多语言文本表保持同步。", "ja": "多言語の文字列テーブルを同期します。" },
-      "overview": { "en": "A placeholder description of a localization helper that syncs string tables across languages and flags missing entries.", "zh": "占位简介：一个同步多语言文本表、标出缺失条目的本地化工具。", "ja": "仮の説明：多言語の文字列テーブルを同期し、欠けている項目を知らせるツール。" },
+      "code": "AI-01",
+      "category": "ai",
+      "name": { "en": "AI Memory", "zh": "AI 记忆系统", "ja": "AI メモリ" },
+      "summary": { "en": "Long-term project memory for coding agents.", "zh": "让编程 AI 记住项目知识的长期记忆。", "ja": "コーディング AI のための長期プロジェクト記憶。" },
+      "overview": { "en": "A placeholder description: a memory layer that lets coding agents keep project knowledge, decisions and dependencies across sessions.", "zh": "占位简介：一个让编程 AI 跨会话保留项目知识、设计决策和依赖关系的记忆层。", "ja": "仮の説明：コーディング AI がセッションをまたいで知識・設計判断・依存関係を保つ記憶レイヤー。" },
+      "image": null,
+      "stack": ["python", "json"],
+      "links": { "github": null, "demo": null }
+    },
+    {
+      "code": "AI-02",
+      "category": "ai",
+      "name": { "en": "Source Check", "zh": "信源核查", "ja": "情報源チェック" },
+      "summary": { "en": "Matches retrieved facts to the question and grades sources.", "zh": "核对检索结果是否对得上问题，并给来源分档。", "ja": "検索結果を質問と照合し、情報源を格付けします。" },
+      "overview": { "en": "A placeholder description: a retrieval checker that matches search results against the question's conditions and grades each source.", "zh": "占位简介：一个把检索结果和问题条件逐条对照、并给来源分档的核查工具。", "ja": "仮の説明：検索結果を質問の条件と照合し、情報源ごとに格付けするツール。" },
+      "image": null,
+      "stack": ["python"],
+      "links": { "github": null, "demo": null }
+    },
+    {
+      "code": "AI-03",
+      "category": "ai",
+      "name": { "en": "Agent Workflow", "zh": "AI 工作流", "ja": "AI ワークフロー" },
+      "summary": { "en": "Multi-step agent workflows with review gates.", "zh": "带复核关卡的多步骤 AI 工作流。", "ja": "レビュー付きの多段階 AI ワークフロー。" },
+      "overview": { "en": "A placeholder description: multi-step agent workflows that hand tasks to sub-agents and review the results.", "zh": "占位简介：把任务交给子代理、再复核结果的多步骤 AI 工作流。", "ja": "仮の説明：サブエージェントにタスクを任せ、結果をレビューする多段階ワークフロー。" },
+      "image": null,
+      "stack": ["python", "javascript"],
+      "links": { "github": null, "demo": null }
+    },
+    {
+      "code": "ENG-01",
+      "category": "engineering",
+      "name": { "en": "Game Localization Tools", "zh": "游戏本地化工具", "ja": "ゲームローカライズツール" },
+      "summary": { "en": "Text extraction, reinsertion and font patching for fan translations.", "zh": "为民间汉化提取、回填文本并修补字体。", "ja": "有志翻訳のためのテキスト抽出・再挿入・フォント差し替え。" },
+      "overview": { "en": "A placeholder description: the technical side of a volunteer game localization: unpacking resources, extracting and reinserting text, fixing fonts and encodings, and supporting the translators.", "zh": "占位简介：无偿游戏本地化项目的技术方案：拆包、提取与回填文本、处理字体和编码，并为翻译组提供技术支持。", "ja": "仮の説明：有志のゲームローカライズの技術面：リソースの展開、テキストの抽出と再挿入、フォントと文字コードの対応、翻訳者のサポート。" },
       "image": "images/p01.svg",
       "stack": ["python", "json"],
       "links": { "github": "https://github.com/username/localization-tool", "demo": null }
     },
     {
-      "code": "P-02",
+      "code": "ENG-02",
+      "category": "engineering",
+      "name": { "en": "Poké-like RPG", "zh": "宝可梦式 RPG", "ja": "ポケモン風 RPG" },
+      "summary": { "en": "A dice-based monster battler built with Godot 4.", "zh": "用 Godot 4 做的骰子对战怪兽 RPG。", "ja": "Godot 4 で作ったダイス式モンスターバトル。" },
+      "overview": { "en": "A turn-based monster RPG built with Godot 4: dice battles, data-driven monsters and moves, branching NPC dialogue and save/load.", "zh": "用 Godot 4 做的回合制怪兽 RPG：骰子对战、数据驱动的怪兽与招式、分支 NPC 对话和存读档。", "ja": "Godot 4 製のターン制モンスター RPG。ダイスバトル、データ駆動のモンスターと技、分岐する NPC 会話、セーブ／ロード。" },
+      "image": "images/p03.svg",
+      "stack": ["godot", "gdscript", "json"],
+      "links": { "github": "https://github.com/username/dice-rpg", "demo": null }
+    },
+    {
+      "code": "ENG-03",
+      "category": "engineering",
+      "name": { "en": "Game Engine", "zh": "游戏引擎", "ja": "ゲームエンジン" },
+      "summary": { "en": "A small game engine written from scratch.", "zh": "从零写的小型游戏引擎。", "ja": "ゼロから書いた小さなゲームエンジン。" },
+      "overview": { "en": "A placeholder description: a small engine with rendering, input, a scene system and asset loading.", "zh": "占位简介：一个包含渲染、输入、场景系统和资源加载的小型引擎。", "ja": "仮の説明：描画、入力、シーンシステム、アセット読み込みを備えた小さなエンジン。" },
+      "image": null,
+      "stack": ["csharp", "git"],
+      "links": { "github": null, "demo": null }
+    },
+    {
+      "code": "OPS-01",
+      "category": "it-operations",
+      "name": { "en": "Linux Diagnostics", "zh": "Linux 诊断", "ja": "Linux 診断" },
+      "summary": { "en": "Finding and fixing faults on Linux systems.", "zh": "排查并修复 Linux 系统故障。", "ja": "Linux システムの障害を調べて直します。" },
+      "overview": { "en": "A placeholder description: diagnosing Linux systems through logs, services, disks and networking, with notes on each fix.", "zh": "占位简介：通过日志、服务、磁盘和网络排查 Linux 系统，并记录每次修复。", "ja": "仮の説明：ログ、サービス、ディスク、ネットワークから Linux を診断し、修正を記録。" },
+      "image": null,
+      "stack": ["python"],
+      "links": { "github": null, "demo": null }
+    },
+    {
+      "code": "OPS-02",
+      "category": "it-operations",
       "name": { "en": "AWS Learning", "zh": "AWS 学习", "ja": "AWS 学習" },
       "summary": { "en": "Cloud experiments: pipelines, storage, serverless.", "zh": "云端实验：部署流水线、存储、无服务器。", "ja": "クラウド実験：パイプライン、ストレージ、サーバーレス。" },
       "overview": { "en": "A placeholder description of cloud experiments: deployment pipelines, storage and serverless functions.", "zh": "占位简介：部署流水线、存储与无服务器函数等云端实验。", "ja": "仮の説明：デプロイパイプライン、ストレージ、サーバーレス関数の実験。" },
@@ -47,16 +132,16 @@
       "links": { "github": null, "demo": null }
     },
     {
-      "code": "P-03",
-      "name": { "en": "Poké-like RPG", "zh": "宝可梦式 RPG", "ja": "ポケモン風 RPG" },
-      "summary": { "en": "A dice-based monster battler built with Godot 4.", "zh": "用 Godot 4 做的骰子对战怪兽 RPG。", "ja": "Godot 4 で作ったダイス式モンスターバトル。" },
-      "overview": { "en": "A turn-based monster RPG built with Godot 4: dice battles, data-driven monsters and moves, branching NPC dialogue and save/load.", "zh": "用 Godot 4 做的回合制怪兽 RPG：骰子对战、数据驱动的怪兽与招式、分支 NPC 对话和存读档。", "ja": "Godot 4 製のターン制モンスター RPG。ダイスバトル、データ駆動のモンスターと技、分岐する NPC 会話、セーブ／ロード。" },
-      "image": "images/p03.svg",
-      "stack": ["godot", "gdscript", "json"],
-      "links": { "github": "https://github.com/username/dice-rpg", "demo": null }
+      "code": "OPS-03",
+      "category": "it-operations",
+      "name": { "en": "Home Lab", "zh": "家庭实验室", "ja": "ホームラボ" },
+      "summary": { "en": "Self-hosted services, backups and monitoring.", "zh": "自建服务、备份与监控。", "ja": "セルフホストのサービス、バックアップ、監視。" },
+      "overview": { "en": "A placeholder description: a home lab running self-hosted services in containers, with backups and monitoring.", "zh": "占位简介：一个用容器运行自建服务、带备份和监控的家庭实验室。", "ja": "仮の説明：コンテナでセルフホストのサービスを動かし、バックアップと監視を備えたホームラボ。" },
+      "image": null,
+      "stack": ["docker"],
+      "links": { "github": null, "demo": null }
     }
   ],
-
   "skills": [
     { "group": "LANGUAGES", "items": [
       { "id": "python", "name": "Python", "level": 4, "years": { "en": "3 yrs", "zh": "3 年", "ja": "3 年" }, "note": { "en": "Scripts, data tools, P-01.", "zh": "脚本、数据工具、P-01。", "ja": "スクリプト、データツール、P-01。" } },

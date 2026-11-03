@@ -22,26 +22,48 @@ function thumb(project, cls) {
     : el('div', { class: `${cls} blank` }, project.code);
 }
 
-export function renderProjects(host, { data, lang }) {
-  const list = () => {
-    const strip = el('div', { class: 'strip' }, data.projects.map((p, i) =>
-      el('div', { class: 'pf', 'data-i': i, tabindex: 0, onclick: () => detail(p) },
-        thumb(p, 'img'),
-        el('div', { class: 'lbl' }, p.code),
-        el('div', { class: 'nm' }, pick(p.name, lang)))));
-    const wrap = el('div', { class: 'strip-wrap' }, strip);
-    if (data.projects.length > 3) {
-      const scroll = dir => strip.scrollBy({ left: dir * strip.clientWidth * 0.8, behavior: 'smooth' });
-      wrap.append(el('button', { class: 'arrow left', type: 'button', 'aria-label': 'previous', onclick: () => scroll(-1) }, '‹'),
-        el('button', { class: 'arrow right', type: 'button', 'aria-label': 'next', onclick: () => scroll(1) }, '›'));
-    }
-    host.replaceChildren(...sectionHead('projects', lang), wrap);
-    host.scrollTop = 0;
-  };
+/** A strip of film frames; arrows appear once it holds more than three. */
+function strip(frames) {
+  const row = el('div', { class: 'strip' }, frames);
+  const wrap = el('div', { class: 'strip-wrap' }, row);
+  if (frames.length > 3) {
+    const scroll = dir => row.scrollBy({ left: dir * row.clientWidth * 0.8, behavior: 'smooth' });
+    wrap.append(el('button', { class: 'arrow left', type: 'button', 'aria-label': 'previous', onclick: () => scroll(-1) }, '‹'),
+      el('button', { class: 'arrow right', type: 'button', 'aria-label': 'next', onclick: () => scroll(1) }, '›'));
+  }
+  return wrap;
+}
 
-  const detail = p => {
+const frame = (item, name, label, open, attrs = {}) =>
+  el('div', { class: 'pf', tabindex: 0, onclick: open, ...attrs }, thumb(item, 'img'), el('div', { class: 'lbl' }, label), el('div', { class: 'nm' }, name));
+
+/**
+ * Projects page: categories -> one category's projects -> a project's detail, each level linking back up.
+ * Without `projectCategories` in the data it falls back to a single strip of every project.
+ */
+export function renderProjects(host, { data, lang }) {
+  const cats = data.projectCategories || [];
+  const show = (...nodes) => { host.replaceChildren(...nodes); host.scrollTop = 0; };
+  const linkback = (text, onclick) => el('span', { class: 'linkback', role: 'button', tabindex: 0, onclick }, text);
+  const inCat = c => data.projects.filter(p => p.category === c.id);
+  const projectStrip = (projects, back) => strip(projects.map(p => frame(p, pick(p.name, lang), p.code, () => detail(p, back))));
+
+  const categories = () => show(...sectionHead('projects', lang), strip(cats.map(c =>
+    frame(c, pick(c.name, lang), t('ui.projectCount', lang).replace('{n}', inCat(c).length), () => category(c), { 'data-cat': c.id }))));
+
+  const category = c => show(
+    sectionHead('projects', lang)[0],
+    el('h2', {}, pick(c.name, lang)),
+    c.summary ? el('div', { class: 'sub' }, pick(c.summary, lang)) : null,
+    projectStrip(inCat(c), () => category(c)),
+    linkback(t('ui.allCategories', lang), categories));
+
+  const all = () => show(...sectionHead('projects', lang), projectStrip(data.projects, all));
+
+  const detail = (p, back) => {
     const links = [['github', p.links?.github], ['demo', p.links?.demo]].filter(([, url]) => url);
-    host.replaceChildren(
+    const cat = cats.find(c => c.id === p.category);
+    show(
       sectionHead('projects', lang)[0],
       el('h2', {}, `${p.code} / ${pick(p.name, lang)}`),
       el('div', { class: 'sub' }, pick(p.summary, lang)),
@@ -55,10 +77,9 @@ export function renderProjects(host, { data, lang }) {
           links.length ? el('div', { class: 'grp-name' }, t('ui.links', lang)) : null,
           links.length ? el('div', { class: 'links' }, links.map(([k, url]) =>
             el('a', { href: url, target: '_blank', rel: 'noopener', 'data-link': k }, t(`ui.${k}`, lang)))) : null)),
-      el('span', { class: 'linkback', role: 'button', tabindex: 0, onclick: list }, t('ui.allProjects', lang)));
-    host.scrollTop = 0;
+      linkback(cat ? `← ${pick(cat.name, lang)}` : t('ui.allProjects', lang), back));
   };
 
   closeNotesOnBackgroundClick(host);
-  list();
+  if (cats.length) categories(); else all();
 }
