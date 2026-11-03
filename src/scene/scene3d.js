@@ -121,8 +121,9 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
       .filter(h => h.object.visible && (!film.meshes.includes(h.object) || Math.abs(h.point.x) <= CONFIG.STRIP_END));
     const first = hits[0], hit = first?.object;
     if (!hit) return null;
-    if (isIn(hit, machine.loadKnob.group) || hit === machine.screen.glass) return { kind: 'load' };
-    if (isIn(hit, machine.langKnob.group)) return { kind: 'lang' };
+    if (isIn(hit, machine.loadKnob.group)) return { kind: 'load', knob: 'load' };
+    if (hit === machine.screen.glass) return { kind: 'load' };
+    if (isIn(hit, machine.langKnob.group)) return { kind: 'lang', knob: 'lang' };
     const ci = film.frameAt(first);
     return ci === null ? null : { kind: 'frame', index: ci };
   }
@@ -139,7 +140,12 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
   }
   function onMove(e) {
     mouse.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
-    if (!drag) { if (canBrowse(state)) canvas.classList.toggle('hover', !!pickAt(e)); return; }
+    if (!drag) {
+      const hit = canBrowse(state) ? pickAt(e) : null;
+      canvas.classList.toggle('hover', !!hit);
+      machine.setHover(hit?.knob ?? null);
+      return;
+    }
     const now = performance.now();
     dragMove(physics, (e.clientX - drag.lastX) * worldPerPx() * 1.1, (now - drag.lastT) / 1000);
     drag.moved = Math.max(drag.moved, Math.hypot(e.clientX - drag.x, e.clientY - drag.y));

@@ -1,14 +1,14 @@
 // The reader bench: one machine on a wooden worktable. An articulated column behind the screen carries
 // a boom: the screen hangs from it on a sliding yoke, and two reels hang from its cross beam on thin
 // rods. The film strip lies across the bench through a lit reading gate and ribbons up to the reels.
-// A small control panel, parallel to the screen, holds the language and VIEW/LOAD knobs; a desk lamp
-// lights the gate. (No projector body, lens, housing box or lever.)
+// A brass knob bar holds the language and VIEW/LOAD knobs; a lamp hung from the beam lights the gate.
+// (No projector body, lens, housing box or lever.)
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { CONFIG } from '../config.js';
 import { SECTIONS } from '../core/content.js';
 import { t } from '../core/i18n.js';
-import { canvasTex, grungeTex, woodTex, windowTex, drawDial, ensureFonts, agedBrassMaps, flangeAlpha, filmPackFaceTex } from './textures.js';
+import { canvasTex, grungeTex, woodTex, windowTex, drawArcDial, ensureFonts, agedBrassMaps, flangeAlpha, filmPackFaceTex } from './textures.js';
 import { filmPose, reelHub, guideExit } from './film.js';
 import { clockText } from './clock.js';
 
@@ -189,39 +189,63 @@ export function buildMachine(stage, lang) {
   }
   drawIdle(0, lang);
 
-  // ---- control panel, parallel to the screen, facing the camera; two knobs with their labels on an outer ring
-  const { POS: [kx, ky, kz], SIZE: [KW, KH], KNOB_X } = CONFIG.CONSOLE;
-  const panel = group([kx, ky, kz]); panel.rotation.x = -0.12;
-  mesh(new RoundedBoxGeometry(KW, KH, 0.09, 3, 0.03), M.iron, [0, 0, 0], panel);
-  for (const [x, y, w, h] of [[0, KH / 2, KW, 0.02], [0, -KH / 2, KW, 0.02], [KW / 2, 0, 0.02, KH], [-KW / 2, 0, 0.02, KH]]) mesh(new THREE.BoxGeometry(w, h, 0.1), M.brass, [x, y, 0], panel);
-  for (const x of [-KW / 2 + 0.12, KW / 2 - 0.12]) mesh(new THREE.CylinderGeometry(0.025, 0.035, ky - KH / 2, 12), M.ironMid, [kx + x, (ky - KH / 2) / 2, kz - 0.02]);
-  const plate = canvasTex(256, 64, (g, w, h) => {
-    g.fillStyle = '#c4a067'; g.fillRect(0, 0, w, h); g.strokeStyle = '#5a3c18'; g.lineWidth = 4; g.strokeRect(4, 4, w - 8, h - 8);
-    g.fillStyle = '#3a240c'; g.font = '500 30px "IBM Plex Mono"'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('OR-3', w / 2, h / 2 + 2);
-  });
-  mesh(new THREE.PlaneGeometry(0.2, 0.05), new THREE.MeshStandardMaterial({ map: plate, metalness: 0.7, roughness: 0.45 }), [0, -KH / 2 + 0.05, 0.047], panel);
-  const DIAL_R = 0.15;
-  function knob(x, labels) {
-    const mount = group([x, 0.02, 0.046], panel);
-    const dial = canvasTex(512, 512, c => drawDial(c.canvas, labels, 0.76));
-    mesh(new THREE.CircleGeometry(DIAL_R, 64), new THREE.MeshStandardMaterial({ map: dial, metalness: 0.4, roughness: 0.55 }), [0, 0, 0.001], mount);
-    const ringMat = new THREE.MeshStandardMaterial({ color: 0x8a6232, metalness: 1, roughness: 0.5 });   // brass bezel ring
-    mesh(new THREE.RingGeometry(DIAL_R * 0.98, DIAL_R * 1.06, 64), ringMat, [0, 0, 0.002], mount);
-    const k = new THREE.Group(); mount.add(k);
-    mesh(new THREE.CylinderGeometry(0.068, 0.074, 0.07, 40).rotateX(Math.PI / 2), M.brass, [0, 0, 0.035], k);
-    for (let i = 0; i < 20; i++) {
-      const a = i / 20 * Math.PI * 2;
-      mesh(new THREE.BoxGeometry(0.009, 0.012, 0.064), M.brassDark, [Math.cos(a) * 0.072, Math.sin(a) * 0.072, 0.035], k).rotation.z = a;
-    }
-    mesh(new THREE.CylinderGeometry(0.048, 0.056, 0.016, 40).rotateX(Math.PI / 2), M.ironMid, [0, 0, 0.076], k);
-    mesh(new THREE.BoxGeometry(0.012, 0.07, 0.008), M.pointer, [0, 0.04, 0.086], k);
-    return { k, ringMat };
+  // ---- knob bar: a brass crossbar on two posts; each knob is a chicken-head pointer over a dial plate whose
+  //      engraved arc carries the stops. Labels stay dim until the pointer hovers the knob.
+  const { POS: [kx, ky, kz], HALF, KNOB_X, PLATE_R } = CONFIG.CONSOLE;
+  const { ARC, STOPS } = CONFIG.KNOBS;
+  const barY = ky + 0.02, barZ = kz - 0.09;                                     // runs behind the dial plates, through their centres
+  rod(new THREE.Vector3(kx - HALF, barY, barZ), new THREE.Vector3(kx + HALF, barY, barZ), 0.022, M.brass);
+  for (const sx of [-1, 1]) {
+    const x = kx + sx * HALF;
+    rod(new THREE.Vector3(x, 0.04, barZ), new THREE.Vector3(x, barY, barZ), 0.016, M.ironMid);
+    mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.04, 24), M.iron, [x, 0.02, barZ]);
+    mesh(new THREE.SphereGeometry(0.032, 16, 12), M.brass, [x, barY, barZ]);
   }
-  const load = knob(KNOB_X, [{ text: 'VIEW', angle: 0 }, { text: 'LOAD', angle: Math.PI / 2 }]);
-  const LANG_ANGLE = { en: -Math.PI / 4, zh: 0, ja: Math.PI / 4 };
-  const langKnob = knob(-KNOB_X, [{ text: 'EN', angle: -Math.PI / 4, size: 52 }, { text: '中', angle: 0, size: 60 }, { text: '日', angle: Math.PI / 4, size: 60 }]);
-  let langTarget = -LANG_ANGLE[lang];
-  langKnob.k.rotation.z = langTarget;
+  const tagTex = canvasTex(256, 96, (g, w, h) => {
+    g.fillStyle = '#b48c56'; g.fillRect(0, 0, w, h); g.strokeStyle = '#5a3c18'; g.lineWidth = 5; g.strokeRect(5, 5, w - 10, h - 10);
+    g.fillStyle = '#3a240c'; g.font = '500 44px "IBM Plex Mono"'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('OR-3', w / 2, h / 2 + 3);
+  });
+  mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.05, 6), M.brass, [kx, barY - 0.035, barZ + 0.02]);
+  mesh(new THREE.PlaneGeometry(0.12, 0.045), new THREE.MeshStandardMaterial({ map: tagTex, metalness: 0.7, roughness: 0.45 }), [kx, barY - 0.08, barZ + 0.025]);
+
+  // chicken-head pointer: a tapered blade with a rounded heel, extruded and bevelled
+  const head = new THREE.Shape();
+  head.moveTo(0, 0.13);
+  head.bezierCurveTo(0.03, 0.12, 0.05, 0.02, 0.048, -0.02);
+  head.bezierCurveTo(0.046, -0.07, -0.046, -0.07, -0.048, -0.02);
+  head.bezierCurveTo(-0.05, 0.02, -0.03, 0.12, 0, 0.13);
+  const headGeo = new THREE.ExtrudeGeometry(head, { depth: 0.045, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.01, bevelSegments: 4, curveSegments: 24 });
+  const knobBrass = new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: brassTex.map, bumpMap: brassTex.bump, bumpScale: 0.4, roughnessMap: brassTex.rough, roughness: 0.6, metalness: 1, clearcoat: 0.3 });
+  const knobs = {};
+  function knob(name, x, stops) {
+    const unit = group([kx + x, ky, kz]);
+    unit.rotation.x = -0.1;                                                     // tipped slightly up towards the camera
+    rod(new THREE.Vector3(kx + x, barY, barZ), new THREE.Vector3(kx + x, ky, kz - 0.02), 0.014, M.brassDark);   // stub from the bar to the plate's back
+    const dialCanvas = document.createElement('canvas'); dialCanvas.width = dialCanvas.height = 512;
+    drawArcDial(dialCanvas, stops, ARC);
+    const dialTex = new THREE.CanvasTexture(dialCanvas); dialTex.colorSpace = THREE.SRGBColorSpace; dialTex.anisotropy = 8;
+    const plateMat = new THREE.MeshStandardMaterial({ map: dialTex, metalness: 0.35, roughness: 0.6, color: 0xc7c7c7 });   // a little dim until hovered
+    mesh(new THREE.CylinderGeometry(PLATE_R + 0.012, PLATE_R + 0.016, 0.03, 64).rotateX(Math.PI / 2), M.brassDark, [0, 0, -0.016], unit);
+    mesh(new THREE.CircleGeometry(PLATE_R, 64), plateMat, [0, 0, 0.0005], unit);
+    const spinner = new THREE.Group(); spinner.position.z = 0.004; unit.add(spinner);
+    // skirt: a short knurled collar under the pointer
+    mesh(new THREE.CylinderGeometry(0.062, 0.07, 0.03, 40).rotateX(Math.PI / 2), M.brassDark, [0, 0, 0.015], spinner);
+    for (let i = 0; i < 24; i++) {
+      const a = i / 24 * Math.PI * 2;
+      mesh(new THREE.BoxGeometry(0.006, 0.01, 0.028), M.iron, [Math.cos(a) * 0.068, Math.sin(a) * 0.068, 0.015], spinner).rotation.z = a;
+    }
+    mesh(headGeo, knobBrass, [0, 0, 0.03], spinner);
+    mesh(new THREE.BoxGeometry(0.008, 0.075, 0.004), M.pointer, [0, 0.065, 0.088], spinner);           // inlaid index line
+    mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.012, 16).rotateX(Math.PI / 2), M.ironMid, [0, -0.015, 0.088], spinner);   // centre screw
+    knobs[name] = { unit, spinner, plateMat, hover: 0, lift: 0 };
+    return knobs[name];
+  }
+  const load = knob('load', KNOB_X, [{ text: 'VIEW', angle: STOPS.load.view }, { text: 'LOAD', angle: STOPS.load.load }]);
+  load.spinner.rotation.z = -STOPS.load.view;
+  const langKnob = knob('lang', -KNOB_X, [{ text: 'EN', angle: STOPS.lang.en }, { text: '中', angle: STOPS.lang.zh, size: 80 }, { text: '日', angle: STOPS.lang.ja, size: 80 }]);
+  let langTarget = -STOPS.lang[lang];
+  langKnob.spinner.rotation.z = langTarget;
+  let hovered = null;
 
   // ---- lamp hanging from the front cross beam on a jointed brass arm, aimed at the reading gate
   const FILM_C = V(CONFIG.FILM_CENTER);
@@ -265,15 +289,22 @@ export function buildMachine(stage, lang) {
     rewinds,
     screen: { rig, glass, bezel, restPos: rig.position.clone(), drawIdle },
     loadKnob: {
-      group: load.k,
-      setTurn(t01) { load.k.rotation.z = -t01 * Math.PI / 2; },   // VIEW -> LOAD
+      group: load.unit,
+      setTurn(t01) { load.spinner.rotation.z = -THREE.MathUtils.lerp(STOPS.load.view, STOPS.load.load, t01); },   // VIEW -> LOAD
     },
-    langKnob: { group: langKnob.k, setLang(l) { langTarget = -LANG_ANGLE[l]; } },
+    langKnob: { group: langKnob.unit, setLang(l) { langTarget = -STOPS.lang[l]; } },
+    /** 'load' | 'lang' | null — the hovered knob brightens its engraving and lifts a little. */
+    setHover(name) { hovered = name; },
     setGateGlow(v) { M.glow.color.setRGB(1, 0.62, 0.25).multiplyScalar(v); },
     setLampLevel(k) { spot.intensity = CONFIG.LAMP_INTENSITY * k; },
     setScreenPower(extra) { glass.material.emissiveIntensity = 0.8 + extra; },
     update(time, dt) {
-      langKnob.k.rotation.z += (langTarget - langKnob.k.rotation.z) * (1 - Math.exp(-14 * dt));
+      langKnob.spinner.rotation.z += (langTarget - langKnob.spinner.rotation.z) * (1 - Math.exp(-14 * dt));
+      for (const [name, k] of Object.entries(knobs)) {
+        k.hover += ((hovered === name ? 1 : 0) - k.hover) * (1 - Math.exp(-10 * dt));
+        k.plateMat.color.setScalar(0.78 + 0.6 * k.hover);
+        k.spinner.position.z = 0.004 + 0.018 * k.hover;
+      }
       for (let i = 0; i < N; i++) {
         pos[i * 3] = base[i * 3] + Math.sin(time * 0.21 + seed[i]) * 0.08;
         pos[i * 3 + 1] = base[i * 3 + 1] + Math.sin(time * 0.13 + seed[i] * 2) * 0.1;

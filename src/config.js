@@ -33,7 +33,15 @@ export const CONFIG = Object.freeze({
   REEL: Object.freeze({ X: 2.5, Y: [1.95, 1.55], Z: 0.45, R: 0.46, DEPTH: 0.14 }),   // [left, right] heights differ on purpose; hung on rods
   SCREEN: Object.freeze({ REST: [0, 2.2, -1.05], BEZEL: [2.62, 1.82], GLASS: [2.3, 1.5], SLIDE: 0.9 }),
   RIG: Object.freeze({ COLUMN: [0, -1.85], BOOM_Y: 3.42, BEAM_Z: 0.3 }),   // column foot (x, z); boom height; cross beam depth
-  CONSOLE: Object.freeze({ POS: [0, 1.0, 0.15], SIZE: [1.15, 0.36], KNOB_X: 0.3 }),
+  // knob bar: a brass crossbar on two posts; each knob is a chicken-head pointer over a dial plate with an engraved arc
+  CONSOLE: Object.freeze({ POS: [0, 1.17, 0.15], HALF: 0.72, KNOB_X: 0.4, PLATE_R: 0.25 }),
+  KNOBS: Object.freeze({
+    ARC: 1.05,                                         // engraved arc spans ±60° from 12 o'clock
+    STOPS: Object.freeze({                             // pointer angles, radians clockwise from 12 o'clock
+      lang: Object.freeze({ en: -0.75, zh: 0, ja: 0.75 }),
+      load: Object.freeze({ view: -0.6, load: 0.6 }),
+    }),
+  }),
   LAMP: [1.72, 2.5, 0.35],  // shade of the lamp hanging from the front cross beam, aimed at the reading gate
   LAMP_INTENSITY: 42,       // spot brightness on the reading gate
 });

@@ -182,6 +182,30 @@ export function filmPackFaceTex() {
   });
 }
 
+/** Dial plate for a chicken-head knob: dark bronze, an engraved arc over the top with ticks, labels above the stops.
+ *  stops: [{ text, angle, size? }] (radians clockwise from 12 o'clock); arc: half-span of the engraved arc. */
+export function drawArcDial(canvas, stops, arc) {
+  const g = canvas.getContext('2d'), s = canvas.width, c = s / 2;
+  g.clearRect(0, 0, s, s);
+  const face = g.createRadialGradient(c * 0.8, c * 0.7, 10, c, c, c);
+  face.addColorStop(0, '#3a2c1e'); face.addColorStop(0.7, '#241a11'); face.addColorStop(1, '#17110b');
+  g.fillStyle = face; g.beginPath(); g.arc(c, c, c - 3, 0, 7); g.fill();
+  g.strokeStyle = '#6a4e2c'; g.lineWidth = 7; g.beginPath(); g.arc(c, c, c - 8, 0, 7); g.stroke();
+  const at = (a, r) => [c + Math.sin(a) * r, c - Math.cos(a) * r];
+  // engraved look: a dark groove with a faint highlight just below it
+  const groove = (draw) => { g.save(); g.translate(0, 2); g.strokeStyle = 'rgba(255,220,160,.18)'; g.fillStyle = 'rgba(255,220,160,.18)'; draw(); g.restore(); g.strokeStyle = '#a07a48'; g.fillStyle = '#a07a48'; draw(); };
+  groove(() => { g.lineWidth = 5; g.beginPath(); g.arc(c, c, c * 0.6, -Math.PI / 2 - arc, -Math.PI / 2 + arc); g.stroke(); });
+  for (let a = -arc; a <= arc + 1e-6; a += arc / 6) groove(() => { const [x0, y0] = at(a, c * 0.6), [x1, y1] = at(a, c * 0.66); g.lineWidth = 3; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); });
+  for (const { angle } of stops) groove(() => { const [x0, y0] = at(angle, c * 0.56), [x1, y1] = at(angle, c * 0.7); g.lineWidth = 6; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); });
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  for (const { text, angle, size = 70 } of stops) {
+    const [x, y] = at(angle, c * 0.83);
+    g.font = `600 ${size}px "IBM Plex Mono", "MS Mincho", "ＭＳ 明朝", "Noto Serif JP", "Noto Serif SC"`;
+    g.fillStyle = 'rgba(0,0,0,.55)'; g.fillText(text, x, y - 2);
+    g.fillStyle = '#b08a56'; g.fillText(text, x, y + 1);
+  }
+}
+
 /** Dial face: tick ring plus labels at given angles (radians, 0 = 12 o'clock, clockwise). labelR: label radius as a share of the dial radius. */
 export function drawDial(canvas, labels, labelR = 0.6) {
   const g = canvas.getContext('2d'), s = canvas.width, c = s / 2;
