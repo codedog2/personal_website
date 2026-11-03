@@ -36,10 +36,11 @@ export const CONFIG = Object.freeze({
   // knob bar: a brass crossbar on two posts; each knob is a chicken-head pointer over a dial plate with an engraved arc
   CONSOLE: Object.freeze({ POS: [0, 1.12, 0.15], HALF: 0.56, KNOB_X: 0.3, PLATE_R: 0.175 }),
   KNOBS: Object.freeze({
-    ARC: 1.05,                                         // engraved arc spans ±60° from 12 o'clock
+    ARC: 0.95,                                         // engraved arc spans ±54° around the pivot
+    PIVOT: 0.36,                                       // pointer pivots below the plate centre; labels get the top half
     STOPS: Object.freeze({                             // pointer angles, radians clockwise from 12 o'clock
-      lang: Object.freeze({ en: -0.75, zh: 0, ja: 0.75 }),
-      load: Object.freeze({ view: -0.6, load: 0.6 }),
+      lang: Object.freeze({ en: -0.68, zh: 0, ja: 0.68 }),
+      load: Object.freeze({ view: 0, load: 0.68 }),
     }),
   }),
   LAMP: [1.72, 2.5, 0.35],  // shade of the lamp hanging from the front cross beam, aimed at the reading gate

@@ -192,7 +192,7 @@ export function buildMachine(stage, lang) {
   // ---- knob bar: a brass crossbar on two posts; each knob is a chicken-head pointer over a dial plate whose
   //      engraved arc carries the stops. Labels stay dim until the pointer hovers the knob.
   const { POS: [kx, ky, kz], HALF, KNOB_X, PLATE_R } = CONFIG.CONSOLE;
-  const { ARC, STOPS } = CONFIG.KNOBS;
+  const { ARC, STOPS, PIVOT } = CONFIG.KNOBS;
   const barY = ky + 0.02, barZ = kz - 0.09;                                     // runs behind the dial plates, through their centres
   rod(new THREE.Vector3(kx - HALF, barY, barZ), new THREE.Vector3(kx + HALF, barY, barZ), 0.022, M.brass);
   for (const sx of [-1, 1]) {
@@ -223,12 +223,12 @@ export function buildMachine(stage, lang) {
     unit.rotation.x = -0.1;                                                     // tipped slightly up towards the camera
     rod(new THREE.Vector3(kx + x, barY, barZ), new THREE.Vector3(kx + x, ky, kz - 0.02), 0.014, M.brassDark);   // stub from the bar to the plate's back
     const dialCanvas = document.createElement('canvas'); dialCanvas.width = dialCanvas.height = 512;
-    drawArcDial(dialCanvas, stops, ARC);
+    drawArcDial(dialCanvas, stops, ARC, PIVOT);
     const dialTex = new THREE.CanvasTexture(dialCanvas); dialTex.colorSpace = THREE.SRGBColorSpace; dialTex.anisotropy = 8;
-    const plateMat = new THREE.MeshStandardMaterial({ map: dialTex, metalness: 0.35, roughness: 0.6, color: 0xc7c7c7 });   // a little dim until hovered
+    const plateMat = new THREE.MeshStandardMaterial({ map: dialTex, metalness: 0.3, roughness: 0.6 });   // brightens further on hover
     mesh(new THREE.CylinderGeometry(PLATE_R + 0.012, PLATE_R + 0.016, 0.03, 64).rotateX(Math.PI / 2), M.brassDark, [0, 0, -0.016], unit);
     mesh(new THREE.CircleGeometry(PLATE_R, 64), plateMat, [0, 0, 0.0005], unit);
-    const spinner = new THREE.Group(); spinner.position.z = 0.004; spinner.scale.setScalar(PLATE_R / 0.25); unit.add(spinner);   // pointer modelled for a 0.25 plate
+    const spinner = new THREE.Group(); spinner.position.set(0, -PIVOT * PLATE_R, 0.004); spinner.scale.setScalar(PLATE_R / 0.22); unit.add(spinner);   // pivots low; pointer modelled for a 0.22 plate
     // skirt: a short knurled collar under the pointer
     mesh(new THREE.CylinderGeometry(0.062, 0.07, 0.03, 40).rotateX(Math.PI / 2), M.brassDark, [0, 0, 0.015], spinner);
     for (let i = 0; i < 24; i++) {
@@ -303,7 +303,7 @@ export function buildMachine(stage, lang) {
       langKnob.spinner.rotation.z += (langTarget - langKnob.spinner.rotation.z) * (1 - Math.exp(-14 * dt));
       for (const [name, k] of Object.entries(knobs)) {
         k.hover += ((hovered === name ? 1 : 0) - k.hover) * (1 - Math.exp(-10 * dt));
-        k.plateMat.color.setScalar(0.78 + 0.6 * k.hover);
+        k.plateMat.color.setScalar(1 + 0.4 * k.hover);
         k.spinner.position.z = 0.004 + 0.018 * k.hover;
       }
       for (let i = 0; i < N; i++) {
