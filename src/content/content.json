@@ -16,6 +16,7 @@
     "photo": null,
     "contacts": [
       { "kind": "email", "label": "EMAIL", "value": "yaowei.terry.feng@gmail.com", "href": "mailto:yaowei.terry.feng@gmail.com" },
+      { "kind": "phone", "label": "PHONE", "value": "080-4187-5214", "href": "tel:+818041875214" },
       { "kind": "github", "label": "GITHUB", "value": "github.com/codedog2", "href": "https://github.com/codedog2" },
       { "kind": "linkedin", "label": "LINKEDIN", "value": "linkedin.com/in/feng-yaowei-807a42216", "href": "https://www.linkedin.com/in/feng-yaowei-807a42216" }
     ],

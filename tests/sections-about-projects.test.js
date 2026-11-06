@@ -15,6 +15,16 @@ test('about shows name, contacts and education', () => {
   expect(h.textContent).toContain('Temple University');
 });
 
+test('contacts sit in the right column under the card, with a phone number', () => {
+  const h = host(); renderAbout(h, ctx('en'));
+  expect(h.querySelector('.main .contact')).toBeNull();
+  expect(h.querySelector('.side .card + .contact')).not.toBeNull();
+  const tel = h.querySelector('.contact a[href^="tel:"]');
+  expect(tel.getAttribute('href')).toBe('tel:+818041875214');
+  expect(tel.textContent).toBe('080-4187-5214');
+  expect(h.querySelectorAll('.contact [data-copy]').length).toBe(2);   // email and phone
+});
+
 test('about follows language', () => {
   const h = host(); renderAbout(h, ctx('ja'));
   expect(h.textContent).toContain('テンプル大学');

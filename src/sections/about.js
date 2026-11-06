@@ -13,13 +13,15 @@ function copyButton(value, lang) {
   return btn;
 }
 
+const LOCAL = new Set(['email', 'phone']);   // mailto:/tel: links open in place and get a copy button
+
 export function renderAbout(host, { data, lang }) {
   const p = data.profile;
   const contacts = el('div', { class: 'contact' }, (p.contacts || []).map(c => [
     el('span', { class: 'k' }, c.label),
     el('span', { class: 'v' },
-      el('a', { href: c.href, target: c.kind === 'email' ? null : '_blank', rel: c.kind === 'email' ? null : 'noopener' }, c.value),
-      c.kind === 'email' ? copyButton(c.value, lang) : null),
+      el('a', { href: c.href, target: LOCAL.has(c.kind) ? null : '_blank', rel: LOCAL.has(c.kind) ? null : 'noopener' }, c.value),
+      LOCAL.has(c.kind) ? copyButton(c.value, lang) : null),
   ]));
 
   const card = el('div', { class: 'card' },
@@ -34,7 +36,6 @@ export function renderAbout(host, { data, lang }) {
     el('div', { class: 'main' },
       sectionHead('about', lang),
       el('div', { class: 'name' }, p.name, p.role ? el('span', { class: 'role' }, pick(p.role, lang)) : null),
-      (p.bio || []).map(b => el('p', {}, pick(b, lang))),
-      contacts),
-    card));
+      (p.bio || []).map(b => el('p', {}, pick(b, lang)))),
+    el('div', { class: 'side' }, card, contacts)));   // contacts on the right, under the card, so they show without scrolling
 }

@@ -24,6 +24,8 @@
 .paper .card .ph { display: block; width: 100%; height: calc(12 * var(--u)); object-fit: cover; border-radius: calc(.3 * var(--u)); margin-bottom: calc(1.2 * var(--u)); filter: sepia(.6); }
 .paper .card .k, .paper .contact .k { font-family: var(--mono); font-size: calc(1.1 * var(--u)); letter-spacing: calc(.2 * var(--u)); color: #8a3b1c; margin-top: calc(1.1 * var(--u)); }
 .paper .card .v { font-size: calc(1.45 * var(--u)); line-height: 1.6; }
+.paper .about > .side { flex: 1; min-width: 0; }
+.paper .about > .side > .contact { margin-top: calc(3 * var(--u)); overflow-wrap: anywhere; }
 .paper .contact { margin-top: calc(1.6 * var(--u)); display: grid; grid-template-columns: auto 1fr; gap: calc(.6 * var(--u)) calc(1.6 * var(--u)); font-size: calc(1.45 * var(--u)); align-items: baseline; }
 .paper .contact .k { margin: 0; color: #8a5a2a; }
 .paper .contact a { color: var(--paper-ink); text-decoration: none; border-bottom: 1px dashed #8a5a2a; }
