@@ -33,7 +33,7 @@ export function renderAbout(host, { data, lang }) {
   host.replaceChildren(el('div', { class: 'cols about' },
     el('div', { class: 'main' },
       sectionHead('about', lang),
-      el('div', { class: 'name' }, p.name, el('span', { class: 'role' }, pick(p.role, lang))),
+      el('div', { class: 'name' }, p.name, p.role ? el('span', { class: 'role' }, pick(p.role, lang)) : null),
       (p.bio || []).map(b => el('p', {}, pick(b, lang))),
       contacts),
     card));

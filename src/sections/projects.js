@@ -11,7 +11,7 @@ export function stackToken(host, data, id, lang) {
     e.stopPropagation();
     host.querySelectorAll('.tk.on').forEach(x => x.classList.remove('on'));
     tk.classList.add('on');
-    showNote(host, tk, { title: skill.name, meta: levelBar(skill.level), body: `${pick(skill.years, lang)} · ${pick(skill.note, lang)}` });
+    showNote(host, tk, { title: skill.name, meta: levelBar(skill.level), body: [pick(skill.years, lang), pick(skill.note, lang)].filter(Boolean).join(' · ') });
   });
   return tk;
 }

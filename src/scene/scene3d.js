@@ -59,7 +59,7 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
 
   function paintChrome() {
     kicker.textContent = t('ui.brand.kicker', lang);
-    role.textContent = pick(data.profile.role, lang);
+    role.textContent = pick(data.profile.role, lang); role.hidden = !role.textContent;   // no role line (or its rule) when the profile has none
     hint.textContent = `${t('ui.hint.browse', lang)}  ·  ${t('ui.hint.load', lang)}`;
     soundBtn.textContent = t(sound.enabled ? 'ui.sound.on' : 'ui.sound.off', lang);
     soundBtn.classList.toggle('on', sound.enabled);

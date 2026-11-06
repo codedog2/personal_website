@@ -30,7 +30,6 @@ export function validateContent(content) {
   const list = (v, where) => { if (!Array.isArray(v)) problems.push(`${where}: must be a list`); };
   list(p.bio, 'profile.bio'); list(p.contacts, 'profile.contacts'); list(p.education, 'profile.education');
   need(p.name, 'profile.name');
-  need(p.role, 'profile.role');
   (p.bio || []).forEach((b, i) => need(b, `profile.bio[${i}]`));
   (p.education || []).forEach((e, i) => need(e, `profile.education[${i}]`));
   need(p.interests, 'profile.interests');

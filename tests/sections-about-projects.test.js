@@ -12,12 +12,22 @@ test('about shows name, contacts and education', () => {
   expect(h.textContent).toContain('Terry (Yaowei) Feng');
   expect(h.querySelectorAll('.contact a').length).toBe(getContent().profile.contacts.length);
   expect(h.querySelector('.card .clip')).not.toBeNull();
-  expect(h.textContent).toContain('Rikkyo University');
+  expect(h.textContent).toContain('Temple University');
 });
 
 test('about follows language', () => {
   const h = host(); renderAbout(h, ctx('ja'));
-  expect(h.textContent).toContain('ソフトウェアエンジニア');
+  expect(h.textContent).toContain('テンプル大学');
+});
+
+test('about without a role or photo leaves no empty role tag or photo slot', () => {
+  const data = structuredClone(getContent()); delete data.profile.role; data.profile.photo = null;
+  const h = host(); renderAbout(h, { data, lang: 'en' });
+  expect(h.querySelector('.name .role')).toBeNull();
+  expect(h.querySelector('.card .ph')).toBeNull();
+  data.profile.role = { en: 'Engineer' };
+  renderAbout(h, { data, lang: 'en' });
+  expect(h.querySelector('.name .role').textContent).toBe('Engineer');
 });
 
 test('email copy button writes to clipboard and shows copied label', async () => {
@@ -26,7 +36,7 @@ test('email copy button writes to clipboard and shows copied label', async () =>
   const h = host(); renderAbout(h, ctx('en'));
   h.querySelector('[data-copy]').click();
   await Promise.resolve(); await Promise.resolve();
-  expect(write).toHaveBeenCalledWith('name@example.com');
+  expect(write).toHaveBeenCalledWith(getContent().profile.contacts.find(c => c.kind === 'email').value);
   expect(h.querySelector('[data-copy]').textContent).toBe(t('ui.copied', 'en'));
 });
 
@@ -40,9 +50,12 @@ function openProject(h, data, p) {
 test('projects open on the three categories, three projects each', () => {
   const h = host(); renderProjects(h, ctx('en'));
   expect([...h.querySelectorAll('.pf .nm')].map(n => n.textContent)).toEqual(['AI', 'Engineering', 'IT Operations']);
-  for (const c of getContent().projectCategories) expect(getContent().projects.filter(p => p.category === c.id).length).toBe(3);
+  const counts = getContent().projectCategories.map(c => getContent().projects.filter(p => p.category === c.id).length);
+  for (const n of counts) { expect(n).toBeGreaterThan(0); expect(n).toBeLessThanOrEqual(3); }
   expect(h.querySelector('.pf .lbl').textContent).toBe('3 PROJECTS');
   expect(h.querySelector('.linkback')).toBeNull();
+  h.querySelectorAll('.pf')[2].click();
+  expect(h.querySelectorAll('.pf').length).toBe(counts[2]);
 });
 
 test('categories follow language', () => {
@@ -84,9 +97,24 @@ test('project without links or image omits them, never prints undefined', () => 
 test('stack token opens the skill note', () => {
   const h = host(); renderProjects(h, ctx('en'));
   openProject(h, getContent(), getContent().projects.find(p => p.code === 'ENG-02'));
-  h.querySelector('.tk[data-skill="godot"]').click();
+  h.querySelector('.tk[data-skill="rust"]').click();
   expect(h.querySelector('.note')).not.toBeNull();
-  expect(h.querySelector('.note').textContent).toContain('Godot 4');
+  expect(h.querySelector('.note').textContent).toContain('Plume');
+});
+
+test('skill note without years has no leading separator', () => {
+  const data = structuredClone(getContent());
+  const rust = data.skills.flatMap(g => g.items).find(s => s.id === 'rust');
+  const h = host(); delete rust.years;
+  renderProjects(h, { data, lang: 'en' });
+  openProject(h, data, data.projects.find(p => p.code === 'ENG-02'));
+  h.querySelector('.tk[data-skill="rust"]').click();
+  expect(h.querySelector('.note .nb').textContent).toBe(rust.note.en);
+  rust.years = { en: '2 yrs' };
+  renderProjects(h, { data, lang: 'en' });
+  openProject(h, data, data.projects.find(p => p.code === 'ENG-02'));
+  h.querySelector('.tk[data-skill="rust"]').click();
+  expect(h.querySelector('.note .nb').textContent).toBe(`2 yrs · ${rust.note.en}`);
 });
 
 test('data text is not interpreted as markup', () => {

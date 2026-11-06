@@ -2,6 +2,7 @@ import { renderSkills, levelBar } from '../src/sections/skills.js';
 import { renderCertificates } from '../src/sections/certificates.js';
 import { renderSection } from '../src/sections/index.js';
 import { getContent, SECTIONS } from '../src/core/content.js';
+import { t } from '../src/core/i18n.js';
 
 const host = () => { const h = document.createElement('div'); document.body.append(h); return h; };
 
@@ -30,11 +31,21 @@ test('certificates tally and locked badges', () => {
 });
 
 test('earned badge with url shows credential link; locked badge shows preparing text', () => {
-  const h = host(); renderCertificates(h, { data: getContent(), lang: 'en' });
+  const data = structuredClone(getContent()); data.certificates.find(c => c.status === 'earned').url = 'https://example.com/badge';
+  const h = host(); renderCertificates(h, { data, lang: 'en' });
   h.querySelector('.badge:not(.locked)').click();
   expect(h.querySelector('.note a')).not.toBeNull();
   h.querySelector('.badge.locked').click();
   expect(h.querySelector('.note').textContent).toContain('Currently preparing');
+});
+
+test('in-progress certificate without a date shows only the status', () => {
+  const data = structuredClone(getContent());
+  const i = data.certificates.findIndex(c => c.status === 'in-progress'); delete data.certificates[i].date;
+  const h = host(); renderCertificates(h, { data, lang: 'zh' });
+  h.querySelectorAll('.badge')[i].click();
+  expect([...h.querySelectorAll('.note .nh span')].map(s => s.textContent)).toEqual([t('ui.inProgress', 'zh')]);
+  expect(h.innerHTML).not.toContain('undefined');
 });
 
 test('certificate without url shows no credential link', () => {

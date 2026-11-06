@@ -8,6 +8,11 @@ test('shipped content is valid', () => {
   expect(validateContent(getContent())).toEqual([]);
 });
 
+test('profile role is optional', () => {
+  const data = structuredClone(getContent()); delete data.profile.role;
+  expect(validateContent(data).some(p => p.includes('role'))).toBe(false);
+});
+
 test('validation reports missing english and bad status', () => {
   const bad = structuredClone(getContent());
   bad.projects[0].name = { zh: '只有中文' };
