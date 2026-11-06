@@ -51,7 +51,8 @@
 .paper .detail .side { flex: 1; min-width: 0; }
 .paper .links { display: flex; gap: calc(1.6 * var(--u)); font-size: calc(1.4 * var(--u)); }
 .paper .links a { color: #7a4a22; }
-.paper .linkback { font-family: var(--mono); font-size: calc(1.2 * var(--u)); color: #7a4a22; cursor: pointer; margin-top: calc(1.6 * var(--u)); display: inline-block; }
+.paper .linkback { font-family: var(--mono); font-size: calc(1.2 * var(--u)); color: #7a4a22; cursor: pointer; margin-top: calc(1.6 * var(--u)); display: inline-block; transition: color .15s; }
+.paper .linkback:hover, .paper .linkback:focus-visible { color: #3a240c; outline: none; text-decoration: underline; text-underline-offset: .25em; }
 
 /* skills tokens (TR-49 style boxes) */
 .paper .grp { margin-bottom: calc(1.4 * var(--u)); }

@@ -49,9 +49,8 @@ export async function mountScene(root, { sound, switchView, lowPower = false, ca
   const simpleBtn = el('button', { type: 'button', class: 'chip', onclick: () => switchView('2d') });
   const readerBody = el('div', { class: 'section' });
   const reader = el('div', { class: 'reader', role: 'dialog', 'aria-modal': 'true', tabindex: -1 }, el('div', { class: 'paper' }, readerBody));
-  const exitKey = el('kbd', {}, 'ESC');
   const exitLabel = el('span');
-  const exit = el('button', { type: 'button', class: 'back', onclick: () => unload() }, exitLabel, exitKey);
+  const exit = el('button', { type: 'button', class: 'back', title: 'Esc', onclick: () => unload() }, exitLabel);
   reader.append(exit);                                   // BACK sits in the corner of the paper, outside the scrolling area
   const shell = el('div', { class: 'oa3d' }, brand, hint, el('div', { class: 'topright' }, soundBtn, simpleBtn), reader);
   root.replaceChildren(shell);

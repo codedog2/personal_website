@@ -16,3 +16,11 @@ test('BACK lives inside the reading screen, not floating below it', () => {
   expect(chrome).not.toMatch(/\.exit\s*\{[^}]*position:\s*fixed/);
   expect(chrome).toMatch(/\.reader\s+\.back\s*\{[^}]*position:\s*absolute/);
 });
+
+test('BACK reads like the paper back links: mono brown text, no box or keycap', () => {
+  const back = chrome.match(/\.reader\s+\.back\s*\{([^}]*)\}/)[1];
+  expect(back).toMatch(/font-family:\s*var\(--mono\)/);
+  expect(back).toMatch(/color:\s*#7a4a22/);
+  expect(back).toMatch(/border:\s*0/);
+  expect(chrome).not.toMatch(/\.back\s+kbd/);
+});
