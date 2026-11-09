@@ -9,6 +9,9 @@ import { runIntro } from './intro/intro.js';
 const root = document.getElementById('app');
 document.documentElement.lang = initLang();
 const sound = createSound();
+// sound is on by default, but browsers keep audio locked until the visitor's first click, tap or key press
+const unlockAudio = () => sound.unlock();
+for (const type of ['pointerdown', 'keydown', 'touchend']) addEventListener(type, unlockAudio, { capture: true, passive: true });
 
 const view = chooseView({
   webgl: hasWebGL(),

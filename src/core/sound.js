@@ -1,7 +1,9 @@
-// Small synthesized machine sounds (Web Audio). Nothing is created until the visitor turns sound on,
-// and every call is a no-op while it is off or unsupported.
+// Small synthesized machine sounds (Web Audio). Sound is on by default; turning it off is remembered.
+// The AudioContext is created on the first sound or gesture (browsers only start audio after one),
+// and every call is a no-op while sound is off or unsupported.
+import { readPref, writePref } from './prefs.js';
 
-export function createSound(AudioCtor = globalThis.AudioContext) {
+export function createSound(AudioCtor = globalThis.AudioContext, { enabled = readPref('sound', true) } = {}) {
   let ctx = null;
 
   const ready = () => {
@@ -32,8 +34,10 @@ export function createSound(AudioCtor = globalThis.AudioContext) {
   }
 
   const api = {
-    enabled: false,
-    setEnabled(on) { api.enabled = !!on; if (on) ready(); },
+    enabled: !!enabled,
+    setEnabled(on) { api.enabled = !!on; writePref('sound', api.enabled); if (on) ready(); },
+    /** Call from a click / key press: browsers only let audio start inside a user gesture. */
+    unlock() { ready(); },
     tick() { noise(0.025, 3200, 4, 0.5); },
     clunk() { noise(0.06, 900, 2, 0.8); tone(110, 40, 0.18, 0.5, 0.01); },
     whirr() { for (let i = 0; i < 10; i++) noise(0.03, 1800 + i * 60, 6, 0.18, i * 0.07); },

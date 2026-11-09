@@ -1,4 +1,7 @@
 import { createSound } from '../src/core/sound.js';
+import { readPref } from '../src/core/prefs.js';
+
+afterEach(() => { localStorage.clear(); });
 
 function fakeAudioContext() {
   const node = () => ({ connect: vi.fn(function (n) { return n; }), start: vi.fn(), stop: vi.fn(),
@@ -12,9 +15,39 @@ function fakeAudioContext() {
   };
 }
 
-test('no AudioContext until enabled; calls are safe while off', () => {
+test('sound is on by default; the AudioContext waits for the first sound', () => {
   const Ctor = vi.fn(() => fakeAudioContext());
   const s = createSound(Ctor);
+  expect(s.enabled).toBe(true);
+  expect(Ctor).not.toHaveBeenCalled();
+  s.tick();
+  expect(Ctor).toHaveBeenCalledTimes(1);
+});
+
+test('turning sound off is remembered for the next visit', () => {
+  const Ctor = vi.fn(() => fakeAudioContext());
+  createSound(Ctor).setEnabled(false);
+  expect(readPref('sound')).toBe(false);
+  const s = createSound(Ctor);
+  expect(s.enabled).toBe(false);
+  s.tick();
+  expect(Ctor).not.toHaveBeenCalled();
+});
+
+test('unlock starts audio on a gesture, only while sound is on', () => {
+  const ctx = { ...fakeAudioContext(), state: 'suspended' };
+  const Ctor = vi.fn(() => ctx);
+  const off = createSound(Ctor, { enabled: false });
+  off.unlock();
+  expect(Ctor).not.toHaveBeenCalled();
+  createSound(Ctor).unlock();
+  expect(Ctor).toHaveBeenCalledTimes(1);
+  expect(ctx.resume).toHaveBeenCalled();
+});
+
+test('no AudioContext until enabled; calls are safe while off', () => {
+  const Ctor = vi.fn(() => fakeAudioContext());
+  const s = createSound(Ctor, { enabled: false });
   expect(s.enabled).toBe(false);
   s.tick(); s.clunk(); s.whirr(); s.powerOn();
   expect(Ctor).not.toHaveBeenCalled();

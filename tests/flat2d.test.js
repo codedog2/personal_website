@@ -6,7 +6,7 @@ let api;
 const setup = () => {
   const root = document.createElement('div'); document.body.append(root);
   const switchView = vi.fn();
-  api = mountFlat(root, { sound: createSound(vi.fn()), switchView });
+  api = mountFlat(root, { sound: createSound(null), switchView });
   return { root, api, switchView };
 };
 afterEach(() => { api?.destroy(); document.body.innerHTML = ''; setLang('en'); localStorage.clear(); });
