@@ -9,8 +9,8 @@ const FADE_MS = 600;
 
 export function introSchedule(seen) {
   return seen
-    ? { lampOn: 0, typeStart: 0, typeEnd: 0, answerAt: 400, end: 1500 }
-    : { lampOn: 800, typeStart: 900, typeEnd: 3300, answerAt: 3700, end: 5000 };
+    ? { lampOn: 0, typeStart: 0, typeEnd: 0, answerAt: 150, end: 700 }
+    : { lampOn: 250, typeStart: 300, typeEnd: 1700, answerAt: 1900, end: 2800 };
 }
 
 export function runIntro(root, { ready, seen, lang, reducedMotion, beforeReveal }) {

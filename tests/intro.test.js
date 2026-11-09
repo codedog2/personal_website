@@ -7,11 +7,11 @@ afterEach(() => { vi.useRealTimers(); document.body.innerHTML = ''; });
 const opts = (o = {}) => ({ ready: Promise.resolve(), seen: false, lang: 'en', reducedMotion: false, ...o });
 const mk = () => { const r = document.createElement('div'); document.body.append(r); return r; };
 
-test('first visit lasts 4–6 s, returning visit ≤ 1.8 s', () => {
+test('first visit lasts 2–3 s, returning visit ≤ 1 s', () => {
   const a = introSchedule(false);
-  expect(a.end).toBeGreaterThanOrEqual(4000); expect(a.end).toBeLessThanOrEqual(6000);
+  expect(a.end).toBeGreaterThanOrEqual(2000); expect(a.end).toBeLessThanOrEqual(3000);
   expect(a.typeStart).toBeLessThan(a.typeEnd); expect(a.answerAt).toBeLessThan(a.end);
-  expect(introSchedule(true).end).toBeLessThanOrEqual(1800);
+  expect(introSchedule(true).end).toBeLessThanOrEqual(1000);
 });
 
 test('skip resolves immediately', async () => {
